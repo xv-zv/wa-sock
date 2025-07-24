@@ -1,0 +1,20 @@
+{
+  "name": "wa-sock",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xv-zv/wa-sock.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xv-zv/wa-sock/issues"
+  },
+  "homepage": "https://github.com/xv-zv/wa-sock#readme"
+}
