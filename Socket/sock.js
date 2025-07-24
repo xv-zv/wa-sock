@@ -1,4 +1,3 @@
-const Events = require('events')
 const {
    makeWASocket,
    DisconnectReason: DR,
@@ -9,14 +8,16 @@ const {
 } = require('@whiskeysockets/baileys');
 const P = require('pino');
 const fs = require('fs-extra');
+const Events = require('./listners.js')
+const Ctx = require('./context.js')
 
-class Socket extends Events {
+class Socket {
    #args
-   #limit
+   #limit = 0
    constructor(args) {
       super()
       this.#args = args
-      this.#limit = 0
+      this.ev = new Events()
    }
    
    start = async () => {
@@ -34,27 +35,32 @@ class Socket extends Events {
          },
          browser: Browsers.ubuntu('Chrome')
       })
-      this.initEvents(sock, { saveCreds })
+      this.#initEvents(sock, { saveCreds })
    }
    
-   initEvents = (sock, args) => {
+   #initEvents = (sock, args) => {
       if (this.#limit >= 5) {
          this.emit('connection', 'closed')
-         return
-      } else if (this.#limit > 1) {
-         sock.ev.removeAllListeners()
-         this.removeAllListeners()
+         return sock.ws.close()
       }
-      const events = this.listEvents(sock, args)
+      const events = this.#listEvents(sock, args)
       for (const { event, func } of events) {
          sock.ev.on(event, func)
       }
    }
    
-   listEvents = (sock, { saveCreds }) => [
+   #listEvents = (sock, { saveCreds }) => [
    {
       event: 'messages.upsert',
-      func: async (messagesCtx) => {
+      func: async ({ type, messages: [ctx] }) => {
+         if (type == 'notify') {
+            let m = new Ctx(sock, ctx, this.#args)
+            if (m.isCommand) {
+               this.ev.emitCmd(m.command, m)
+            } else {
+               this.ev.emit('text', m)
+            }
+         }
       }
    },
    {
@@ -70,7 +76,7 @@ class Socket extends Events {
          }
          if (this.#args.newLogin && !sock.authState?.creds?.registered && Boolean(update.qr)) {
             const token = await sock.requestPairingCode(this.#args.phone)
-            this.emit('onli_token', token)
+            this.emit('token_off', token)
          }
          
          const isClose = connection == 'close'
@@ -88,6 +94,7 @@ class Socket extends Events {
                return emit('deleted')
             }
             this.#limit += 1
+            sock.ev.removeAllListeners()
             emit('restart')
             this.start()
          } else if (isOpen || isOnline) {
@@ -95,4 +102,9 @@ class Socket extends Events {
          }
       }
    }]
+   
+   command = (cmd, func) => {
+      if (this.ev.commands[cmd]) return this
+      this.ev.command(cmd, func)
+   }
 }
