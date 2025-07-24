@@ -39,7 +39,7 @@ class Socket {
    
    #initEvents = (sock, args) => {
       if (this.#limit >= 5) {
-         this.emit('connection', 'closed')
+         this.ev.emit('connection', 'closed')
          return sock.ws.close()
       }
       const events = this.#listEvents(sock, args)
@@ -71,11 +71,11 @@ class Socket {
       func: async ({ connection, ...update }) => {
          const emit = async reazon => {
             await delay(100)
-            this.emit('connection', reazon)
+            this.ev.emit('connection', reazon)
          }
          if (this.#args.newLogin && !sock.authState?.creds?.registered && Boolean(update.qr)) {
             const token = await sock.requestPairingCode(this.#args.phone)
-            this.emit('token_off', token)
+            this.ev.off('token', token)
          }
          
          const isClose = connection == 'close'

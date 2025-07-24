@@ -18,10 +18,8 @@ class Events {
    }
    
    emit = (event, ...args) => {
-      let [ev, n] = event.split('_')
-      if (!this.events[ev]) return 
-      this.events[ev].forEach(func => func(...args))
-      if (n === 'off') delete this.events[ev]
+      if (!this.events[event]) return
+      this.events[event].forEach(func => func(...args))
    }
    
    emitCmd = (command, ...args) => {
@@ -30,8 +28,14 @@ class Events {
       return this
    }
    
+   off = (event, args) => {
+      if (!this.events[event]) return
+      this.events[event].forEach(func => func(...args))
+      delete this.events[event]
+   }
+   
    rmAllEvents = () => this.events = {}
-
+   
    rmAllCmds = () => this.commands = {}
 }
 
