@@ -21,7 +21,8 @@ class Ctx {
       }
    }
    
-   get extractCtx(m = {}) {
+   get extractCtx() {
+      let m = {}
       let {
          remoteJid,
          fromMe,

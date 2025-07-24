@@ -15,7 +15,6 @@ class Socket {
    #args
    #limit = 0
    constructor(args) {
-      super()
       this.#args = args
       this.ev = new Events()
    }
