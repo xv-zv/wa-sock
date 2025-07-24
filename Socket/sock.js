@@ -108,3 +108,5 @@ class Socket {
       this.ev.command(cmd, func)
    }
 }
+
+module.exports = { Socket }
