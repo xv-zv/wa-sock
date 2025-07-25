@@ -8,8 +8,8 @@ const {
 } = require('@whiskeysockets/baileys');
 const P = require('pino');
 const fs = require('fs-extra');
-const Events = require('./listners.js')
-const Ctx = require('./context.js')
+const Events = require('./Utils/listners.js')
+const Ctx = require('./sms.js')
 
 class Socket {
    #args
@@ -53,9 +53,11 @@ class Socket {
       event: 'messages.upsert',
       func: async ({ type, messages: [ctx] }) => {
          if (type == 'notify') {
-            let m = new Ctx(sock, ctx, this.#args)
-            if (m.isCommand) {
-               this.ev.emitCmd(m.command, m)
+            
+            const m = new Ctx(sock, ctx, this.#args)
+            
+            if (m.body.isCmd) {
+               this.ev.emitCmd(m.body.cmd, m)
             } else {
                this.ev.emit('text', m)
             }
