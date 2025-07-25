@@ -1,6 +1,7 @@
 const {
    getContentType,
-   jidNormalizedUser
+   jidNormalizedUser,
+   downloadContentFromMessage
 } = require('@whiskeysockets/baileys')
 const F = require('../Utils/funcs.js')
 
@@ -30,7 +31,7 @@ class Ctx {
    get extract() {
       const key = this.#message.key
       const message = this.#message.message
-      const { body, quoted } = this.getBody(message)
+      const { body, quoted, media } = this.getBody(message)
       
       const m = {
          from: this.getFrom(key),
@@ -39,7 +40,7 @@ class Ctx {
             ...body
          }
       }
-      
+      if (media) m.media = this.getMedia(media)
       if (quoted) {
          m.quote = this.getQuote(quoted)
       }
@@ -58,7 +59,8 @@ class Ctx {
    }
    
    getBody = (message, quoted = false) => {
-      const m = {}
+      const m = {},
+         media
       if (!message || message.protocolMessage) return { body: m }
       
       const type = getContentType(message)
@@ -81,6 +83,10 @@ class Ctx {
          }
       }
       
+      const isMedia = Boolean(msg.mimetype) && ('directPath' in msg)
+      
+      if (isMedia) media = msg
+      
       const ctx = msg.contextInfo
       if (ctx) {
          m.exp = ctx.expiration
@@ -91,10 +97,37 @@ class Ctx {
       return { body: m, quoted }
    }
    
-   getQuote = (m) => ({
-      sender: m.participant,
-      ...this.getBody(m.quotedMessage, true).body
-   })
+   getMedia = (media) => {
+      const mime = media.mimetype
+      const isJpeg = /jpeg/.test(mime)
+      const isMp4 = /(video|mp4)/.test(mime)
+      const isMp3 = /(audio|mp3)/.test(mime)
+      const isWebp = ('isAnimated' in media)
+      const type = isJpeg ? 'image' : isMp4 ? 'video' : isMp3 ? 'audio' : isWebp ? 'sticker' : null
+      const m = {
+         type,
+         mime
+      }
+      if (isWebp) m.anim = media.isAnimated
+      if (media.seconds) m.duration = media.seconds
+      m.media = async () => {
+         const stream = await downloadContentFromMessage(media, type)
+         const buffer = []
+         for await (const chunk of stream) {
+            buffer.push(chunk)
+         }
+         return Buffer.concat(buffer)
+      }
+   }
+   
+   getQuote = (m) => {
+      const isMedia = m.quotedMessage.mimetype
+      return {
+         sender: m.participant,
+         ...this.getBody(m.quotedMessage, true).body,
+         ...(isMedia ? this.getMedia(m.quotedMessage) : {})
+      }
+   }
 }
 
 module.exports = Ctx

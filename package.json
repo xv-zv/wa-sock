@@ -1,6 +1,6 @@
 {
   "name": "wa-sock",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "this simple socket",
   "main": "./Socket/sock.js",
   "repository": {
@@ -8,7 +8,7 @@
     "url": "git+https://github.com/xv-zv/wa-sock.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Vy Svn",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/xv-zv/wa-sock/issues"

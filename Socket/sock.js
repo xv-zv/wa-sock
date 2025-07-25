@@ -55,7 +55,7 @@ class Socket {
          if (type == 'notify') {
             
             const m = new Ctx(sock, ctx, this.#args)
-            
+
             if (m.body.isCmd) {
                this.ev.emitCmd(m.body.cmd, m)
             } else {
