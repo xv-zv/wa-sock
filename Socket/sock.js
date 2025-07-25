@@ -9,11 +9,12 @@ const {
 const P = require('pino');
 const fs = require('fs-extra');
 const Events = require('../Utils/listners.js')
-const Ctx = require('./sms.js')
+const Ctx = require('./context.js')
 
 class Socket {
    #args
    #limit = 0
+   #ctx
    constructor(args) {
       this.#args = args
       this.ev = new Events()
@@ -42,6 +43,7 @@ class Socket {
          this.ev.emit('connection', 'closed')
          return sock.ws.close()
       }
+      this.#ctx = new Ctx(sock, this.#args)
       const events = this.#listEvents(sock, args)
       for (const { event, func } of events) {
          sock.ev.on(event, func)
@@ -54,13 +56,19 @@ class Socket {
       func: async ({ type, messages: [ctx] }) => {
          if (type == 'notify') {
             
-            const m = new Ctx(sock, ctx, this.#args)
-
-            if (m.body.isCmd) {
-               this.ev.emitCmd(m.body.cmd, m)
-               this.ev.emit('cmds',m)
-            } else {
-               this.ev.emit('text', m)
+            const m = this.#ctx(ctx)
+            const isCmd = m.body.isCmd
+            const isMedia = Boolean(m.media)
+            const a = [m, sock]
+            if (isCmd) {
+               this.ev.emitCmd(m.body.cmd, ...a)
+               this.ev.emit('cmds', ...a)
+            }
+            if (!isMedia && !isCmd) {
+               this.ev.emit('text', ...a)
+            }
+            if (Boolean(m.media)) {
+               this.ev.emit('media', ...a)
             }
          }
       }
