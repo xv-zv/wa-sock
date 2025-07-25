@@ -1,6 +1,6 @@
 {
   "name": "wa-sock",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Una conexión simple",
   "main": "./Socket/sock.js",
   "repository": {
