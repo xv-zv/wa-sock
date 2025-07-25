@@ -1,7 +1,5 @@
-# wa-sock
-
-Un cliente simplificado para WhatsApp basado en Baileys.
-
+<h1 align="center">wa-sock</h1>
+ Un simple enchufe 
 ## Instalación
 
 ```bash
