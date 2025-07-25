@@ -54,14 +54,14 @@ class Ctx {
          m = {
             ...m,
             send: (text, o = {}) => sendMessage({ text }, opc),
-            sendImage = (i, o = {}) => S.sendImage(sendMessage, i, o),
-            sendVideo = (v, o = {}) => S.sendVideo(sendMessage, v, o),
+            sendImage: (i, o = {}) => S.sendImage(sendMessage, i, o),
+            sendVideo: (v, o = {}) => S.sendVideo(sendMessage, v, o),
             sendAudio: (a, o) => S.sendAudio(sendMessage, a, o),
             sendFile: (f, o) => S.sendFile(sendMessage, f, o),
-            sendPoll: (p, o) => S.sendPoll(sendMessage, p, o),
+            sendPoll: (p, o) => S.sendPoll(sendMessage, p, o)
          }
          return m
       }
    }
-   
+}
    module.exports = Ctx
