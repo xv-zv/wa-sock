@@ -1,5 +1,5 @@
 const long = require('long').fromNumber;
-const F = require('../Utils/funcs.js');
+const F = require('../Utils/utils.js');
 const { getFileType } = require('./utils.js');
 
 exports.sendImage = (send, img, opt = {}) =>
@@ -43,4 +43,4 @@ exports.sendPoll = (send, data, opt = {}) =>
          values: data.opc,
          toAnnouncementGroup: !!data.announce
       }
-   }, opt);
+   }, { ...opc , ...data });

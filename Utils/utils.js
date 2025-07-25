@@ -3,3 +3,4 @@ module.exports = new class {
    setMedia = url => Buffer.isBuffer(url) ? url : { url }
    setDesc = i => typeof i == 'string' ? i : i.desc || null
 }
+
