@@ -59,8 +59,8 @@ class Ctx {
    }
    
    getBody = (message, quoted = false) => {
-      const m = {},
-         media
+      const m = {}
+      let media
       if (!message || message.protocolMessage) return { body: m }
       
       const type = getContentType(message)
@@ -118,6 +118,7 @@ class Ctx {
          }
          return Buffer.concat(buffer)
       }
+      return m
    }
    
    getQuote = (m) => {
