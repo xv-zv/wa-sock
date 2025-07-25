@@ -70,7 +70,6 @@ class Ctx {
          type === 'extendedTextMessage' ? msg.text : ['imageMessage', 'videoMessage'].includes(type) ? msg.caption :
          ''
       
-      m.type = type
       m.text = body
       
       if (!quoted && body) {
@@ -94,7 +93,7 @@ class Ctx {
          if (ctx.quotedMessage) quoted = ctx
       }
       
-      return { body: m, quoted }
+      return { body: m, quoted , media}
    }
    
    getMedia = (media) => {
