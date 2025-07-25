@@ -16,11 +16,12 @@ class Ctx {
       return this.build()
    }
    
-   get bot() {
+   bot() {
       const user = this.#sock.user
       const args = this.#globalArgs
+      
       return {
-         id: jidNormalizedUser(user.id),
+         id: jidNormalizedUser(user?.id),
          lid: jidNormalizedUser(user.lid),
          name: user.name || 'Vy - Team',
          prefix: F.setArray(args.prefix || '/')
@@ -28,7 +29,7 @@ class Ctx {
    }
    
    build() {
-      const bot = this.bot
+      const bot = this.bot()
       return (msg) => {
          const from = H.getFrom(msg.key)
          const { body, media, quoted } = H.getBody(msg.message, { prefixes: bot.prefix })
