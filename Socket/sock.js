@@ -58,6 +58,7 @@ class Socket {
 
             if (m.body.isCmd) {
                this.ev.emitCmd(m.body.cmd, m)
+               this.ev.emit('cmds',m)
             } else {
                this.ev.emit('text', m)
             }

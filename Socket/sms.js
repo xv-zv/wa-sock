@@ -50,11 +50,10 @@ class Ctx {
    
    getFrom = (key) => {
       const id = key.remoteJid
-      const isGroup = id.endsWith('@g.us')
       return {
          id,
          sender: key.participant || id,
-         isGroup
+         group: id.endsWith('@g.us')
       }
    }
    
