@@ -28,7 +28,7 @@ class Events {
       return this
    }
    
-   off = (event, args) => {
+   off = (event, ...args) => {
       if (!this.events[event]) return
       this.events[event].forEach(func => func(...args))
       delete this.events[event]
