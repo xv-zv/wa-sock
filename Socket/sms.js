@@ -122,7 +122,7 @@ class Ctx {
    
    getQuote = (message) => {
       const { body, media } = this.getBody(message.quotedMessage, true)
-      const m = {
+      return {
          sender: message.participant,
          ...body,
          ...(Boolean(media) ? this.getMedia(media) : {})
