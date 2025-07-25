@@ -55,7 +55,7 @@ class Ctx {
          if (Boolean(quoted)) m.quote = H.getQuote(quoted)
          m = {
             ...m,
-            send: (text, o = {}) => sendMessage({ text }, opc),
+            send: (text, o = {}) => sendMessage({ text }, o),
             sendImage: (i, o = {}) => S.sendImage(sendMessage, i, o),
             sendVideo: (v, o = {}) => S.sendVideo(sendMessage, v, o),
             sendAudio: (a, o) => S.sendAudio(sendMessage, a, o),

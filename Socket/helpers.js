@@ -82,7 +82,7 @@ const getQuote = msg => {
    return {
       sender: msg.participant,
       ...body,
-      ...(Boolean(media) ? media : {})
+      ...(Boolean(media) ? getMedia(media) : {})
    }
 };
 
