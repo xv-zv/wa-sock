@@ -2,7 +2,7 @@ const {
    getContentType,
    jidNormalizedUser
 } = require('@whiskeysockets/baileys')
-const F = require('./Utils/funcs.js')
+const F = require('../Utils/funcs.js')
 
 class Ctx {
    #sock
@@ -27,7 +27,7 @@ class Ctx {
       }
    }
    
-   extract = () => {
+   get extract() {
       const key = this.#message.key
       const message = this.#message.message
       const { body, quoted } = this.getBody(message)
@@ -85,15 +85,15 @@ class Ctx {
       if (ctx) {
          m.exp = ctx.expiration
          m.mentions = ctx.mentionedJid
-         if (ctx.quotedMessage) quoted = ctx.quotedMessage
+         if (ctx.quotedMessage) quoted = ctx
       }
       
       return { body: m, quoted }
    }
    
    getQuote = (m) => ({
-      from: { sender: m.participant },
-      body: this.getBody(m, true).body
+      sender: m.participant,
+      ...this.getBody(m.quotedMessage, true).body
    })
 }
 

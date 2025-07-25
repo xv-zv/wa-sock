@@ -8,7 +8,7 @@ const {
 } = require('@whiskeysockets/baileys');
 const P = require('pino');
 const fs = require('fs-extra');
-const Events = require('./Utils/listners.js')
+const Events = require('../Utils/listners.js')
 const Ctx = require('./sms.js')
 
 class Socket {
