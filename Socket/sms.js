@@ -93,7 +93,7 @@ class Ctx {
          if (ctx.quotedMessage) quoted = ctx
       }
       
-      return { body: m, quoted , media}
+      return { body: m, quoted, media }
    }
    
    getMedia = (media) => {
@@ -120,12 +120,12 @@ class Ctx {
       return m
    }
    
-   getQuote = (m) => {
-      const isMedia = m.quotedMessage.mimetype
-      return {
-         sender: m.participant,
-         ...this.getBody(m.quotedMessage, true).body,
-         ...(isMedia ? this.getMedia(m.quotedMessage) : {})
+   getQuote = (message) => {
+      const { body, media } = this.getBody(message.quotedMessage, true)
+      const m = {
+         sender: message.participant,
+         ...body,
+         ...(Boolean(media) ? this.getMedia(media) : {})
       }
    }
 }
