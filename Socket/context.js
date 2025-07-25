@@ -43,11 +43,13 @@ class Ctx {
                }
             }, { quoted: Boolean(opc.quote) ? msg : Boolean(opc.quoted) ? opc.quoted : null })
          }
-         const m = {
+         let m = {
             bot,
-            from,
+            from: { ...from, name: msg.pushName },
             body: { id: msg.key.id, ...body }
          }
+         
+         if(msg.broadcast) m.from.bc = msg.broadcast
          
          if (Boolean(media)) m.media = H.getMedia(media)
          if (Boolean(quoted)) m.quote = H.getQuote(quoted)
@@ -64,4 +66,4 @@ class Ctx {
       }
    }
 }
-   module.exports = Ctx
+module.exports = Ctx

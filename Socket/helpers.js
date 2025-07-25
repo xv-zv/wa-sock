@@ -12,8 +12,8 @@ const getFrom = key => {
    let id = key.remoteJid
    return {
       id,
-      sender: key.participant || id,
-      group: id.endsWith('@g.us')
+      group: id.endsWith('@g.us'),
+      sender: key.participant || id
    }
 }
 
@@ -33,7 +33,7 @@ const getBody = (message, { quoted, ...o } = {}) => {
       
       m.text = body
       
-      if (!o.quoted && body) {
+      if (!quoted && body) {
          const isCmd = o.prefixes.some(i => body.startsWith(i))
          m.isCmd = isCmd
          if (isCmd) {
