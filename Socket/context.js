@@ -41,7 +41,7 @@ class Ctx {
                   expiration: body.exp || 0,
                   mentionedJid: o.mentions || []
                }
-            }, { quoted: Boolean(opc.quote) ? msg : Boolean(opc.quoted) ? opc.quoted : null })
+            }, { quoted: Boolean(o.quote) ? msg : Boolean(o.quoted) ? o.quoted : null })
          }
          let m = {
             bot,
