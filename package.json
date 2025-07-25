@@ -2,7 +2,7 @@
   "name": "wa-sock",
   "version": "1.2.1",
   "description": "this simple socket",
-  "main": "index.js",
+  "main": "./Socket/sock.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xv-zv/wa-sock.git"
