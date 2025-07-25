@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git+https://github.com/xv-zv/wa-sock.git"
   },
-  "keywords": [],
+  "keywords": ["whatsapp","bot","socket"],
   "author": "Vy Svn",
   "license": "ISC",
   "bugs": {
