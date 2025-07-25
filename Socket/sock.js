@@ -8,8 +8,8 @@ const {
 } = require('@whiskeysockets/baileys');
 const P = require('pino');
 const fs = require('fs-extra');
-const Events = require('../Utils/listners.js')
-const Ctx = require('./context.js')
+const Events = require('../Utils/events.js')
+const Ctx = require('./sms.js')
 
 class Socket {
    #args
@@ -21,6 +21,9 @@ class Socket {
    }
    
    start = async () => {
+      if(!this.#args.path){
+         throw new Error('path required')
+      }
       const logger = P({ level: 'silent' })
       const {
          state: { creds, keys },
@@ -84,7 +87,7 @@ class Socket {
             await delay(100)
             this.ev.emit('connection', reazon)
          }
-         if (this.#args.newLogin && !sock.authState?.creds?.registered && Boolean(update.qr)) {
+         if (this.#args.newLogin && !sock.authState?.creds?.registered && Boolean(update.qr) && this.#args.phone) {
             const token = await sock.requestPairingCode(this.#args.phone)
             this.ev.off('token', token)
          }
@@ -113,7 +116,7 @@ class Socket {
       }
    }]
    
-   command = (cmd, func) => {
+   cmd = (cmd, func) => {
       if (this.ev.commands[cmd]) return this
       this.ev.command(cmd, func)
    }

@@ -1,6 +1,6 @@
 const long = require('long').fromNumber;
 const F = require('../Utils/funcs.js');
-const { getFileType } = require('./helpers');
+const { getFileType } = require('./utils.js');
 
 exports.sendImage = (send, img, opt = {}) =>
    send({

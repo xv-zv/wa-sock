@@ -2,9 +2,9 @@ const {
    jidNormalizedUser
 } = require('@whiskeysockets/baileys');
 
-const F = require('../Utils/funcs.js');
-const H = require('./helpers.js');
-const S = require('./senders.js');
+const F = require('../Utils/utils.js');
+const H = require('./utils.js');
+const S = require('./funcs.js');
 
 class Ctx {
    #sock
