@@ -22,7 +22,7 @@ class Ctx {
       
       return {
          id: jidNormalizedUser(user?.id),
-         lid: jidNormalizedUser(user.lid),
+         lid: jidNormalizedUser(user?.lid),
          name: user.name || 'Vy - Team',
          prefix: F.setArray(args.prefix || '/')
       }
