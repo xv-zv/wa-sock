@@ -41,8 +41,8 @@ export default class Socket {
       
       Object.assign(this, events(), methods(this, this.#opc))
       
-      const events = this.#listEvents(saveCreds)
-      for (const { event, func } of events) {
+      const _events = this.#listEvents(saveCreds)
+      for (const { event, func } of _events) {
          this.#sock.ev.on(event, func)
       }
       
