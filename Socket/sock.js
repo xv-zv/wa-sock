@@ -1,125 +1,109 @@
-const {
-   makeWASocket,
-   DisconnectReason: DR,
+import makeWASocket, {
    useMultiFileAuthState,
-   Browsers,
-   makeCacheableSignalKeyStore,
-   delay
-} = require('@whiskeysockets/baileys');
-const P = require('pino');
-const fs = require('fs-extra');
-const Events = require('../Utils/events.js')
-const Ctx = require('./sms.js')
+   fetchLatestBaileysVersion,
+   DisconnectReason,
+   isRealMessage
+} from 'baileys';
+import pino from 'pino';
+import { DEFAULT_OPC_CONFIG } from '../Defaults/index.js';
+import { events, methods } from '../Utils/index.js';
 
-class Socket {
-   #args
-   #limit = 0
-   #ctx
-   constructor(args) {
-      this.#args = args
-      this.ev = new Events()
+export default class Socket {
+   #opc = DEFAULT_OPC_CONFIG
+   #sock
+   constructor(args = {}) {
+      this.#opc = {
+         ...this.#opc,
+         ...opc
+      }
+   }
+   
+   get isOnline() {
+      return this.#sock?.ws.socket._readyState == 1
    }
    
    start = async () => {
-      if(!this.#args.path){
-         throw new Error('path required')
-      }
-      const logger = P({ level: 'silent' })
-      const {
-         state: { creds, keys },
-         saveCreds
-      } = await useMultiFileAuthState(this.#args.path)
       
-      let sock = await makeWASocket({
+      if (this.isOnline) return
+      
+      const logger = pino({ level: 'silent' })
+      const { version } = await fetchLatestBaileysVersion()
+      const {
+         state: auth,
+         saveCreds
+      } = await useMultiFileAuthState(this.#opc.path)
+      
+      this.#sock = await makeWASocket({
          logger,
-         auth: {
-            creds,
-            keys: makeCacheableSignalKeyStore(keys, logger)
-         },
-         browser: Browsers.ubuntu('Chrome')
+         auth,
+         version
       })
-      this.#initEvents(sock, { saveCreds })
-   }
-   
-   #initEvents = (sock, args) => {
-      if (this.#limit >= 5) {
-         this.ev.emit('connection', 'closed')
-         return sock.ws.close()
-      }
-      this.#ctx = new Ctx(sock, this.#args)
-      const events = this.#listEvents(sock, args)
+      
+      Object.assign(this, events(), methods(this, this.#opc))
+      
+      const events = this.#listEvents(saveCreds)
       for (const { event, func } of events) {
-         sock.ev.on(event, func)
+         this.#sock.ev.on(event, func)
       }
+      
    }
    
-   #listEvents = (sock, { saveCreds }) => [
+   close = () => {
+      this.#sock.ev.removeAllListeners()
+      this.#sock.ws.close()
+   }
+   
+   #listEvents = saveCreds => [
    {
       event: 'messages.upsert',
-      func: async ({ type, messages: [ctx] }) => {
-         if (type == 'notify') {
+      func: async ({ type , messages: [message]}) => {
+         if(type == 'notify'){
+            if(!isRealMessage(message , message.key.id)) return 
+            const m = await this.fetchMessage(message)
+            const params = [m , message]
             
-            const m = this.#ctx(ctx)
-            const isCmd = m.body.isCmd
-            const isMedia = Boolean(m.media)
-            const a = [m, sock]
-            if (isCmd) {
-               this.ev.emitCmd(m.body.cmd, ...a)
-               this.ev.emit('cmds', ...a)
-            }
-            if (!isMedia && !isCmd) {
-               this.ev.emit('text', ...a)
-            }
-            if (Boolean(m.media)) {
-               this.ev.emit('media', ...a)
-            }
          }
+      }
+   },
+   {
+      event: 'connection.update',
+      func: async ({ connection, ...update }) => {
+         if (!this.sock?.authState?.creds?.registered && Boolean(update.qr) && Boolean(this.#opc.phone)) {
+            const code = await this.fetchCode(this.#opc.phone)
+            this.off('code', code)
+         }
+         
+         const isOnline = Boolean(update?.receivedPendingNotifications);
+         const isOpen = connection == 'open';
+         const emit = reazon => this.emit('status', reazon)
+         
+         if (connection == 'close') {
+            
+            const statusCode = update.lastDisconnect.error?.output?.statusCode
+            const isDelete = [DisconnectReason.connectionReplaced,
+               DisconnectReason.loggedOut,
+               DisconnectReason.badSession
+            ].includes(statusCode)
+            
+            this.close()
+            
+            if (isDelete) {
+               fs.removeSync(this.#opc.path)
+               emit('delete')
+               return
+            }
+            
+            emit('restart')
+            setTimeout(this.start, 4500)
+            
+         } else if (isOnline || isOpen) {
+            emit(isOnline ? 'online' : 'open')
+         }
+         
       }
    },
    {
       event: 'creds.update',
       func: saveCreds
-   },
-   {
-      event: 'connection.update',
-      func: async ({ connection, ...update }) => {
-         const emit = async reazon => {
-            await delay(100)
-            this.ev.emit('connection', reazon)
-         }
-         if (this.#args.newLogin && !sock.authState?.creds?.registered && Boolean(update.qr) && this.#args.phone) {
-            const token = await sock.requestPairingCode(this.#args.phone)
-            this.ev.off('token', token)
-         }
-         
-         const isClose = connection == 'close'
-         const isOpen = connection == 'open'
-         const isOnline = Boolean(update.receivedPendingNotifications)
-         
-         if (isClose) {
-            
-            const statusCode = update.lastDisconnect?.error?.output?.statusCode
-            const isDelete = [DR.connectionReplaced, DR.loggedOut].includes(statusCode)
-            
-            if (isDelete) {
-               fs.removeSync(this.#args.path)
-               sock.ws.close()
-               return emit('deleted')
-            }
-            this.#limit += 1
-            sock.ev.removeAllListeners()
-            emit('restart')
-            this.start()
-         } else if (isOpen || isOnline) {
-            emit(isOnline ? 'online' : 'open')
-         }
-      }
    }]
-   
-   cmd = (cmd, func) => {
-      if (this.ev.commands[cmd]) return this
-      this.ev.command(cmd, func)
-   }
 }
-
-module.exports = { Socket }
