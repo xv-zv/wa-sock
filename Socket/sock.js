@@ -11,7 +11,7 @@ import { events, methods } from '../Utils/index.js';
 export default class Socket {
    #opc = DEFAULT_OPC_CONFIG
    #sock
-   constructor(args = {}) {
+   constructor(opc = {}) {
       this.#opc = {
          ...this.#opc,
          ...opc
