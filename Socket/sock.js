@@ -39,7 +39,7 @@ export default class Socket {
          version
       })
       
-      Object.assign(this, events(), methods(this, this.#opc))
+      Object.assign(this, events, methods(this, this.#opc))
       
       const _events = this.#listEvents(saveCreds)
       for (const { event, func } of _events) {
@@ -56,11 +56,11 @@ export default class Socket {
    #listEvents = saveCreds => [
    {
       event: 'messages.upsert',
-      func: async ({ type , messages: [message]}) => {
-         if(type == 'notify'){
-            if(!isRealMessage(message , message.key.id)) return 
+      func: async ({ type, messages: [message] }) => {
+         if (type == 'notify') {
+            if (!isRealMessage(message, message.key.id)) return
             const m = await this.fetchMessage(message)
-            const params = [m , message]
+            const params = [m, message]
             
          }
       }
