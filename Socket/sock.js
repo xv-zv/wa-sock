@@ -6,7 +6,7 @@ import makeWASocket, {
 } from 'baileys';
 import pino from 'pino';
 import { DEFAULT_OPC_CONFIG } from '../Defaults/index.js';
-import { events, methods } from '../Utils/index.js';
+import { utils, methods } from '../Utils/index.js';
 
 export default class Socket {
    #opc = DEFAULT_OPC_CONFIG
@@ -39,10 +39,10 @@ export default class Socket {
          version
       })
       
-      Object.assign(this, events, methods(this, this.#opc))
+      Object.assign(this, utils, methods(this, this.#opc))
       
-      const _events = this.#listEvents(saveCreds)
-      for (const { event, func } of _events) {
+      const events = this.#listEvents(saveCreds)
+      for (const { event, func } of events) {
          this.#sock.ev.on(event, func)
       }
       
