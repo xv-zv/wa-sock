@@ -9,7 +9,7 @@ import ws from 'ws';
 import { DEFAULT_OPC } from '../Defaults/index.js';
 import { Events, methods } from '../Utils/index.js';
 import fetchMessage from './message.js';
-export const OPC_CONFIG = DEFAULT_OPC
+export let OPC_CONFIG = DEFAULT_OPC
 
 export default class Socket extends Events {
    #opc
