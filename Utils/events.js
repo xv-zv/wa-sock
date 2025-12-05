@@ -1,26 +1,24 @@
-const cmds = {}
-const _events = {}
-
-export const events = {
-   emit(event, ...args) {
-      if (!_events[event]) return
-      _events[event](...args)
-   },
-   on(event, listner) {
-      if (_events[event]) return
-      _events[event] = listner
-      return this
-   },
-   off(event, ...args) {
-      this.emit(event, ...args)
-      delete _events[event]
-   },
-   cmd(cmd, listner) {
-      if (cmds[cmd]) return
-      cmds[cmd] = listner
-   },
-   emitCmd(cmd, ...args) {
-      if (!cmds[cmd]) return
-      cmds[cmd](...args)
+export class Events {
+   #events = {}
+   on = (event, listner) => {
+      if (this.#events[event]) return
+      this.#events[event] = listner
    }
+   off = (event, ...args) => {
+      this.emit(event, ...args)
+      delete this.#events[event]
+   }
+   cmd = (cmd, listner) => {
+      if (this.cmds[cmd]) return
+      this.cmds[cmd] = listner
+   }
+   emit = (event, ...args) => {
+      if (!this.#events[event]) return
+      this.#events[event](...args)
+   }
+   emitCmd = (cmd, ...args) => {
+      if (!this.cmds[cmd]) return
+      this.cmds[cmd](...args)
+   }
+   cmds = {}
 }

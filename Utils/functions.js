@@ -1,0 +1,1 @@
+export const toArray = content => Array.isArray(content) ? content : [content]

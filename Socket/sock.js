@@ -5,28 +5,30 @@ import makeWASocket, {
    isRealMessage
 } from 'baileys';
 import pino from 'pino';
-import { DEFAULT_OPC_CONFIG } from '../Defaults/index.js';
-import { utils, methods } from '../Utils/index.js';
+import ws from 'ws';
+import { DEFAULT_OPC } from '../Defaults/index.js';
+import { Events, methods } from '../Utils/index.js';
+import fetchMessage from './message.js';
 
-export default class Socket {
-   #opc = DEFAULT_OPC_CONFIG
+export default class Socket extends Events {
+   #opc
    #sock
    constructor(opc = {}) {
+      super()
       this.#opc = {
-         ...this.#opc,
+         ...DEFAULT_OPC,
          ...opc
       }
    }
    
    get isOnline() {
-      return this.#sock?.ws.socket._readyState == 1
+      return this.#sock?.ws?.socket?._readyState == ws.OPEN
    }
    
    start = async () => {
       
       if (this.isOnline) return
       
-      const logger = pino({ level: 'silent' })
       const { version } = await fetchLatestBaileysVersion()
       const {
          state: auth,
@@ -34,12 +36,12 @@ export default class Socket {
       } = await useMultiFileAuthState(this.#opc.path)
       
       this.#sock = await makeWASocket({
-         logger,
+         logger: pino({ level: 'silent' }),
          auth,
          version
       })
       
-      Object.assign(this, utils, methods(this, this.#opc))
+      Object.assign(this, methods(this.#sock, this.#opc))
       
       const events = this.#listEvents(saveCreds)
       for (const { event, func } of events) {
@@ -49,6 +51,7 @@ export default class Socket {
    }
    
    close = () => {
+      if (!this.isOnline) return
       this.#sock.ev.removeAllListeners()
       this.#sock.ws.close()
    }
@@ -56,12 +59,15 @@ export default class Socket {
    #listEvents = saveCreds => [
    {
       event: 'messages.upsert',
-      func: async ({ type, messages: [message] }) => {
+      func: async ({ type, messages: [msg] }) => {
          if (type == 'notify') {
-            if (!isRealMessage(message, message.key.id)) return
-            const m = await this.fetchMessage(message)
+            if (!isRealMessage(msg, msg.key.id)) return
+            const m = await fetchMessage(this.#sock, msg)
             const params = [m, message]
             
+            if (m.isCmd) this.emitCmd(m.cmd, ...params)
+            if (m.isMedia) this.emit('media', ...params)
+            if (!m.isCmd && m.isMedia) this.emit('text', ...params)
          }
       }
    },
@@ -99,7 +105,6 @@ export default class Socket {
          } else if (isOnline || isOpen) {
             emit(isOnline ? 'online' : 'open')
          }
-         
       }
    },
    {
