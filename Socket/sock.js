@@ -63,7 +63,7 @@ export default class Socket extends Events {
          if (type == 'notify') {
             if (!isRealMessage(msg, msg.key.id)) return
             const m = await fetchMessage(this.#sock, msg)
-            const params = [m, message]
+            const params = [m, msg]
             
             if (m.isCmd) this.emitCmd(m.cmd, ...params)
             if (m.isMedia) this.emit('media', ...params)
