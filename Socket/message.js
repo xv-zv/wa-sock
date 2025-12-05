@@ -5,6 +5,7 @@ import {
    jidNormalizedUser,
    getContentType
 } from 'baileys';
+import { OPC_CONFIG } from './sock.js';
 
 const toObject = obj => {
    const [key, val] = Object.entries(obj)[0]
@@ -34,10 +35,43 @@ async function fetchMessage(sock, ctx, quote) {
    const body = (typeof msg === 'string') ? msg : msg.caption || msg.text || ''
    
    if (body) {
-      const cmd = 'null'
+      
+      const isCmd = OPC_CONFIG.prefix.some(i => body.startsWith(i))
+      
+      if (isCmd && !quote) {
+         
+         const [cmd, ...args] = body.trim().slice(1).split(/ +/)
+         const text = args.join(' ')
+         
+         m = {
+            ...m,
+            isCmd,
+            cmd,
+            ...toObject({ text })
+         }
+      } else {
+         m = {
+            ...m,
+            ...toObject({ text: body })
+         }
+      }
    }
    
-   console.log(ctx, m)
-   return {}
+   if (typeof msg !== 'string' && msg) {
+      if (msg.mimetype) {
+         
+         m = {
+            ...m,
+            isMedia: true,
+            type: type.replace('Message', ''),
+            mime: msg.mimetype,
+            ...toObject({ isAnimated: msg.isAnimated }),
+            ...toObject({ duration: msg.seconds })
+         }
+      }
+   }
+   
+   console.log(m, OPC_CONFIG)
+   return m
 }
 export default fetchMessage
