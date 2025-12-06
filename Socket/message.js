@@ -7,14 +7,7 @@ import {
    downloadMediaMessage
 } from 'baileys';
 import { OPC_CONFIG } from './sock.js';
-import { toArray } from '../Utils/index.js';
-
-const toObject = (obj = {}) => {
-   const [k, v] = Object.entries(obj)[0] || []
-   return (!v || (Array.isArray(v) && !v.length)) ? {} : {
-      [k]: v
-   }
-}
+import { toArray, toObject } from '../Utils/index.js';
 
 async function fetchMessage(sock, ctx, quote) {
    

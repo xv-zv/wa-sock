@@ -6,6 +6,7 @@ import makeWASocket, {
 } from 'baileys';
 import pino from 'pino';
 import ws from 'ws';
+import fs from 'fs/promises';
 import { DEFAULT_OPC } from '../Defaults/index.js';
 import { Events, methods, toArray } from '../Utils/index.js';
 import fetchMessage from './message.js';
@@ -101,7 +102,10 @@ export default class Socket extends Events {
             this.close()
             
             if (isDelete) {
-               fs.removeSync(this.#opc.path)
+              await fs.rm(this.#opc.path, {
+                  force: true,
+                  recursive: true
+               })
                emit('delete')
                return
             }
