@@ -33,11 +33,14 @@ export const methods = (sock) => ({
       const admins = data.participants.filter(i => i.admin !== null).map(i => i.lid)
       const isComm = data.isCommunity
       const isBotAdmin = admins.includes(this.user.lid)
-      const users = data.participants.reduce(acc, user => ({
-         id: user.Jid,
-         lid: user.lid,
-         admin: user !== null
-      }), [])
+      const users = data.participants.reduce((acc, user) => {
+         acc.push({
+            id: user.Jid,
+            lid: user.lid,
+            admin: user.admin !== null
+         })
+         return acc
+      }, [])
       
       return {
          id: data.id,
