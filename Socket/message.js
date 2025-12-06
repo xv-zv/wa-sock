@@ -8,11 +8,10 @@ import {
 } from 'baileys';
 import { OPC_CONFIG } from './sock.js';
 
-const toObject = obj => {
-   const [key, val] = Object.entries(obj)[0]
-   return !Boolean(val) ? {} : {
-      [key]: val
-   }
+const toObject = (obj = {}) => {
+   const [k, v] = Object.entries(obj)[0] || []
+   return (!v || (Array.isArray(v) && !v.length)) ? {} : {
+      [k]: v }
 }
 
 async function fetchMessage(sock, ctx, quote) {
@@ -27,7 +26,7 @@ async function fetchMessage(sock, ctx, quote) {
    let m = {
       from,
       ...toObject({ isGroup }),
-      ...toString({ isLidFrom }),
+      ...toObject({ isLidFrom }),
       ...toObject({ user_pn }),
       ...toObject({ user_lid }),
       ...toObject({ name: ctx.pushName })
