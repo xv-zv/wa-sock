@@ -48,7 +48,7 @@ export default class Socket extends Events {
          version
       })
       
-      Object.assign(this, methods(this.#sock, this.#opc))
+      Object.assign(this, methods(this.#sock))
       
       const events = this.#listEvents(saveCreds)
       for (const { event, func } of events) {
@@ -56,7 +56,7 @@ export default class Socket extends Events {
       }
       
    }
-   
+   online = false
    close = () => {
       if (!this.isOnline) return
       this.#sock.ev.removeAllListeners()
@@ -110,6 +110,7 @@ export default class Socket extends Events {
             setTimeout(this.start, 4500)
             
          } else if (isOnline || isOpen) {
+            if (isOnline) this.online = true
             emit(isOnline ? 'online' : 'open')
          }
       }
