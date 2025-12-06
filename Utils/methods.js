@@ -35,7 +35,7 @@ export const methods = (sock) => ({
       const isBotAdmin = admins.includes(this.user.lid)
       const users = data.participants.reduce((acc, user) => {
          acc.push({
-            id: user.Jid,
+            id: user.jid,
             lid: user.lid,
             admin: user.admin !== null
          })

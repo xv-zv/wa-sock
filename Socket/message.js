@@ -15,16 +15,17 @@ async function fetchMessage(sock, ctx, quote) {
    const isGroup = isJidGroup(from)
    const isLidFrom = isLidUser(from)
    const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
-   const id = jidNormalizedUser(ids.find(i => isJidUser(i)))
-   const lid = jidNormalizedUser(ids.find(i => isLidUser(i)))
-   const isOwner = OPC_CONFIG.owner.some(i => [lid, id].includes(i))
+   const user_pn = jidNormalizedUser(ids.find(i => isJidUser(i)))
+   const user_lid = jidNormalizedUser(ids.find(i => isLidUser(i)))
+   const isOwner = OPC_CONFIG.owner.some(i => [user_lid, user_pn].includes(i))
    
    let m = {
       from,
       ...toObject({ isGroup }),
       ...toObject({ isLidFrom }),
-      ...toObject({ id }),
-      ...toObject({ lid }),
+      ...toObject({ id: user_lid || user_pn }),
+      ...toObject({ user_pn }),
+      ...toObject({ user_lid }),
       ...toObject({ name: ctx.pushName }),
       ...toObject({ isOwner })
    }
