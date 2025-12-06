@@ -74,7 +74,7 @@ export default class Socket extends Events {
             
             if (m.isCmd) this.emitCmd(m.cmd, ...params)
             if (m.isMedia) this.emit('media', ...params)
-            if (!m.isCmd && m.isMedia) this.emit('text', ...params)
+            if (!m.isCmd && !m.isMedia) this.emit('text', ...params)
          }
       }
    },
