@@ -7,6 +7,7 @@ import {
    downloadMediaMessage
 } from 'baileys';
 import { OPC_CONFIG } from './sock.js';
+import * as f from '../Utils/functions.js';
 
 const toObject = (obj = {}) => {
    const [k, v] = Object.entries(obj)[0] || []
@@ -22,6 +23,7 @@ async function fetchMessage(sock, ctx, quote) {
    const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
    const user_pn = jidNormalizedUser(ids.find(i => isJidUser(i)))
    const user_lid = jidNormalizedUser(ids.find(i => isLidUser(i)))
+   const isOwner = OPC_CONFIG.owner.some(i => [user_lid , user_pn].includes(i))
    
    let m = {
       from,
@@ -29,7 +31,8 @@ async function fetchMessage(sock, ctx, quote) {
       ...toObject({ isLidFrom }),
       ...toObject({ user_pn }),
       ...toObject({ user_lid }),
-      ...toObject({ name: ctx.pushName })
+      ...toObject({ name: ctx.pushName }),
+      ...toObject({ isOwner })
    }
    
    const type = getContentType(ctx.message)

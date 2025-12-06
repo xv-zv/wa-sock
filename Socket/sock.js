@@ -7,8 +7,9 @@ import makeWASocket, {
 import pino from 'pino';
 import ws from 'ws';
 import { DEFAULT_OPC } from '../Defaults/index.js';
-import { Events, methods } from '../Utils/index.js';
+import { Events, methods, toArray } from '../Utils/index.js';
 import fetchMessage from './message.js';
+
 export let OPC_CONFIG = DEFAULT_OPC
 
 export default class Socket extends Events {
@@ -20,7 +21,11 @@ export default class Socket extends Events {
          ...DEFAULT_OPC,
          ...opc
       }
-      OPC_CONFIG = this.#opc
+      OPC_CONFIG = {
+         ...this.#opc,
+         prefix: toArray(this.#opc.prefix),
+         owner: toArray(this.#opc.owner)
+      }
    }
    
    get isOnline() {

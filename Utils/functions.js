@@ -1,1 +1,4 @@
-export const toArray = content => Array.isArray(content) ? content : [content]
+export function toArray(content){
+   if(content == null) return []
+   return Array.isArray(content) ? content : [content]
+}
