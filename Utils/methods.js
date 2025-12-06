@@ -33,7 +33,12 @@ export const methods = (sock) => ({
       const admins = data.participants.filter(i => i.admin !== null).map(i => i.lid)
       const isComm = data.isCommunity
       const isBotAdmin = admins.includes(this.user.lid)
-   
+      const users = data.participants.reduce(acc, user => ({
+         id: user.Jid,
+         lid: user.lid,
+         admin: user !== null
+      }), [])
+      
       return {
          id: data.id,
          name: data.subject,
@@ -48,7 +53,7 @@ export const methods = (sock) => ({
          ...(isComm && { isComm }),
          ...(isComm && { parent: data.linkedParent }),
          ...toObject({ isBotAdmin }),
-         users: data.participants,
+         users,
          ...toObject({ ephemeral: data.ephemeralDuration }),
          ...toObject({ desc: data.desc })
       }
