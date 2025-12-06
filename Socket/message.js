@@ -7,12 +7,13 @@ import {
    downloadMediaMessage
 } from 'baileys';
 import { OPC_CONFIG } from './sock.js';
-import * as f from '../Utils/functions.js';
+import { toArray } from '../Utils/index.js';
 
 const toObject = (obj = {}) => {
    const [k, v] = Object.entries(obj)[0] || []
    return (!v || (Array.isArray(v) && !v.length)) ? {} : {
-      [k]: v }
+      [k]: v
+   }
 }
 
 async function fetchMessage(sock, ctx, quote) {
@@ -23,7 +24,7 @@ async function fetchMessage(sock, ctx, quote) {
    const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
    const user_pn = jidNormalizedUser(ids.find(i => isJidUser(i)))
    const user_lid = jidNormalizedUser(ids.find(i => isLidUser(i)))
-   const isOwner = OPC_CONFIG.owner.some(i => [user_lid , user_pn].includes(i))
+   const isOwner = OPC_CONFIG.owner.some(i => [user_lid, user_pn].includes(i))
    
    let m = {
       from,
@@ -100,6 +101,20 @@ async function fetchMessage(sock, ctx, quote) {
             }, true)
          }
       }
+   }
+   
+   if (!quote) {
+      
+      m.reply = function(text, opc = {}) {
+         return sock.sendMessage(opc.from || from, {
+            text,
+            contextInfo: {
+               expiration: opc.ephemeral || m.ephemeral,
+               mentionedJid: toArray(opc.mentions || [])
+            }
+         }, { quoted: opc.quote || ctx })
+      }
+      
    }
    
    return m

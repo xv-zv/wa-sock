@@ -13,9 +13,9 @@ export const methods = (sock) => ({
          ...content,
          contextInfo: {
             expiration: opc.ephemeral,
-            mentinedJid: toArray(opc.tags)
+            mentinedJid: toArray(opc.mentions)
          }
-      }, opc)
+      }, { quote: opc.quote || undefined })
    },
    
 })
