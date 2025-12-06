@@ -3,7 +3,8 @@ import {
    isLidUser,
    isJidUser,
    jidNormalizedUser,
-   getContentType
+   getContentType,
+   downloadMediaMessage
 } from 'baileys';
 import { OPC_CONFIG } from './sock.js';
 
@@ -20,11 +21,13 @@ async function fetchMessage(sock, ctx, quote) {
    const isGroup = isJidGroup(from)
    const isLidFrom = isLidUser(from)
    const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
-   const user_pn = ids.find(i => isJidUser(i))
-   const user_lid = ids.find(i => isLidUser(i))
+   const user_pn = jidNormalizedUser(ids.find(i => isJidUser(i)))
+   const user_lid = jidNormalizedUser(ids.find(i => isLidUser(i)))
    
    let m = {
       from,
+      ...toObject({ isGroup }),
+      ...toString({ isLidFrom }),
       ...toObject({ user_pn }),
       ...toObject({ user_lid }),
       ...toObject({ name: ctx.pushName })
@@ -66,12 +69,37 @@ async function fetchMessage(sock, ctx, quote) {
             type: type.replace('Message', ''),
             mime: msg.mimetype,
             ...toObject({ isAnimated: msg.isAnimated }),
-            ...toObject({ duration: msg.seconds })
+            ...toObject({ duration: msg.seconds }),
+            media: () => downloadMediaMessage(ctx, 'buffer')
+         }
+      }
+      
+      if (msg.contextInfo) {
+         
+         const info = msg.contextInfo
+         
+         m = {
+            ...m,
+            ...toObject({ mentions: info.mentionedJid }),
+            ...toObject({ ephemeral: info.expiration })
+         }
+         
+         if (info.quotedMessage) {
+            
+            m.isQuote = true
+            m.quote = await fetchMessage(sock, {
+               key: {
+                  remoteJid: info.remoteJid || from,
+                  participant: info.participant,
+                  id: info.stanzaId,
+                  fromMe: false // modify
+               },
+               message: info.quotedMessage
+            }, true)
          }
       }
    }
    
-   console.log(m, OPC_CONFIG)
    return m
 }
 export default fetchMessage
