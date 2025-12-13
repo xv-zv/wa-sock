@@ -29,36 +29,53 @@ export const methods = (sock) => ({
    async groupData(id) {
       
       if (!id) return {}
-      const data = await sock.groupMetadata(id)
-      const admins = data.participants.filter(i => i.admin !== null).map(i => i.lid)
-      const isComm = data.isCommunity
-      const isBotAdmin = admins.includes(this.user.lid)
-      const users = data.participants.reduce((acc, user) => {
-         acc.push({
-            id: user.jid,
-            lid: user.lid,
-            admin: user.admin !== null
-         })
-         return acc
-      }, [])
       
-      return {
-         id: data.id,
-         name: data.subject,
-         owner: {
-            id: data.ownerJid,
-            lid: data.owner,
-            country: data.owner_country_code
-         },
-         size: data.size,
-         creation: data.creation,
-         open: !data.announce,
-         ...(isComm && { isComm }),
-         ...(isComm && { parent: data.linkedParent }),
-         ...toObject({ isBotAdmin }),
-         users,
-         ...toObject({ ephemeral: data.ephemeralDuration }),
-         ...toObject({ desc: data.desc })
+      const data = await sock.groupMetadata(id)
+      
+      return gpNormalizeData(data)
+   },
+   async fetchGroupsAll() {
+      try {
+         const groups = Object.values(await sock.groupFetchAllParticipating()).filter(i => !i.isCommunity)
+         return groups.map(i => gpNormalizeData(i))
+      } catch {
+         return []
       }
    }
 })
+
+function gpNormalizeData(data) {
+   
+   if (typeof data !== 'object') return
+   
+   const admins = data.participants.filter(i => i.admin !== null).map(i => i.lid)
+   const isComm = data.isCommunity
+   const isBotAdmin = admins.includes(this.user.lid)
+   const users = data.participants.reduce((acc, user) => {
+      acc.push({
+         id: user.jid,
+         lid: user.lid,
+         admin: user.admin !== null
+      })
+      return acc
+   }, [])
+   
+   return {
+      id: data.id,
+      name: data.subject,
+      owner: {
+         id: data.ownerJid,
+         lid: data.owner,
+         country: data.owner_country_code
+      },
+      size: data.size,
+      creation: data.creation,
+      open: !data.announce,
+      ...(isComm && { isComm }),
+      ...(isComm && { parent: data.linkedParent }),
+      ...toObject({ isBotAdmin }),
+      users,
+      ...toObject({ ephemeral: data.ephemeralDuration }),
+      ...toObject({ desc: data.desc })
+   }
+}

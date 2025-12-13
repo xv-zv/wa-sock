@@ -1,21 +1,19 @@
 {
-  "name": "wa-sock",
-  "version": "1.5.4",
-  "description": "Una conexión simple",
-  "main": "./Socket/sock.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xv-zv/wa-sock.git"
-  },
-  "keywords": ["whatsapp","bot","socket"],
-  "author": "Vy Svn",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/xv-zv/wa-sock/issues"
-  },
-  "homepage": "https://github.com/xv-zv/wa-sock#readme",
-  "dependencies": {
-    "baileys": "^6.7.21",
-    "fs-extra": "^11.3.0"
-  }
+   "name": "wa-sock",
+   "version": "2.0.0",
+   "description": "Una conexión simple",
+   "exports": {
+      ".": "./Socket/sock.js",
+      "./utils": "./Utils/functions.js"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git+https://github.com/xv-zv/wa-sock.git"
+   },
+   "author": "Vy Svn",
+   "license": "ISC",
+   "homepage": "https://github.com/xv-zv/wa-sock#readme",
+   "dependencies": {
+      "baileys": "^6.7.21"
+   }
 }

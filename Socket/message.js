@@ -108,7 +108,11 @@ async function fetchMessage(sock, ctx, quote) {
             }
          }, { quoted: opc.quote || ctx })
       }
-      
+      m.react = function(text) {
+         return sock.sendMessage(m.from, {
+            react: { text, key: ctx.key }
+         })
+      }
    }
    
    return m

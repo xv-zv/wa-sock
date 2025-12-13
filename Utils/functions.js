@@ -9,3 +9,6 @@ export function toObject(obj = {}) {
       [k]: v
    }
 }
+export function delay(time) {
+   return new Promise(resolve => setTimeout(resolve, time))
+}
