@@ -2,7 +2,8 @@ import makeWASocket, {
    useMultiFileAuthState,
    fetchLatestBaileysVersion,
    DisconnectReason,
-   isRealMessage
+   isRealMessage,
+   isJidGroup
 } from 'baileys';
 import pino from 'pino';
 import ws from 'ws';
@@ -11,21 +12,22 @@ import { DEFAULT_OPC } from '../Defaults/index.js';
 import { Events, methods, toArray } from '../Utils/index.js';
 import fetchMessage from './message.js';
 
-export let OPC_CONFIG = DEFAULT_OPC
-
+export let OPC_CONFIG = {}
 export default class Socket extends Events {
    #opc
    #sock
    constructor(opc = {}) {
       super()
-      this.#opc = {
+      OPC_CONFIG = this.#opc = {
          ...DEFAULT_OPC,
-         ...opc
-      }
-      OPC_CONFIG = {
-         ...this.#opc,
-         prefix: toArray(this.#opc.prefix),
-         owner: toArray(this.#opc.owner)
+         ...opc,
+         prefix: toArray(opc.prefix, DEFAULT_OPC),
+         owner: toArray(opc.owner, DEFAULT_OPC.owner),
+         ignore: {
+            ...DEFAULT_OPC.ignore,
+            ...(opc.ignore || {}),
+            ids: toArray(opc.ignore.ids)
+         }
       }
    }
    
@@ -46,7 +48,11 @@ export default class Socket extends Events {
       this.#sock = await makeWASocket({
          logger: pino({ level: 'silent' }),
          auth,
-         version
+         version,
+         shouldIgnoreJid(id) {
+            const { groups, chats, status } = this.#opc.ignore
+            return (isJidGroup(id) ? groups : chats) || isJidBroadcast(id) ? status : false
+         }
       })
       
       Object.assign(this, methods(this.#sock))
@@ -67,15 +73,20 @@ export default class Socket extends Events {
    #listEvents = saveCreds => [
    {
       event: 'messages.upsert',
-      func: async ({ type, messages: [msg] }) => {
+      func: async ({ type, messages }) => {
          if (type == 'notify') {
-            if (!isRealMessage(msg, msg.key.id)) return
-            const m = await fetchMessage(this.#sock, msg)
-            const params = [m, msg]
-            
-            if (m.isCmd) this.emitCmd(m.cmd, ...params)
-            if (m.isMedia) this.emit('media', ...params)
-            if (!m.isCmd && !m.isMedia) this.emit('text', ...params)
+            for (const msg of messages) {
+               
+               if (this.#opc.ignore.ids.includes(msg.key.remoteJid) && !msg.key.fromMe) return
+               if (!isRealMessage(msg, msg.key.id)) return
+               
+               const m = await fetchMessage(this, msg)
+               const params = [m, msg]
+               
+               if (m.isCmd) this.emitCmd(m.cmd, ...params)
+               if (m.isMedia) this.emit('media', ...params)
+               if (!m.isCmd && !m.isMedia) this.emit('text', ...params)
+            }
          }
       }
    },
@@ -102,7 +113,7 @@ export default class Socket extends Events {
             this.close()
             
             if (isDelete) {
-              await fs.rm(this.#opc.path, {
+               await fs.rm(this.#opc.path, {
                   force: true,
                   recursive: true
                })

@@ -2,6 +2,13 @@ import { jidNormalizedUser } from 'baileys'
 import { toArray, toObject } from './functions.js'
 import { OPC_CONFIG } from '../Socket/sock.js';
 
+const colors = [
+   '#FFFFFF', '#000000', '#075E54', '#128C7E', '#25D366',
+   '#34B7F1', '#FFB900', '#FF6F61', '#C850C0', '#FF3B30',
+   '#1E90FF', '#315575', '#6C5CE7', '#FFC107', '#008080',
+   '#4CAF50', '#F44336', '#3F51B5', '#E91E63', '#795548'
+];
+
 export const methods = (sock) => ({
    get user() {
       const user = sock.user || {}
@@ -21,18 +28,30 @@ export const methods = (sock) => ({
       return sock.sendMessage(id, {
          ...content,
          contextInfo: {
+            ...(content.contextInfo || {}),
             expiration: opc.ephemeral,
-            mentinedJid: toArray(opc.mentions)
+            mentionedJid: toArray(opc.mentions)
          }
-      }, { quote: opc.quote || undefined })
+      }, {
+         ...(id === 'status@broadcast' ? {
+            ...(Boolean(content.text) ? {
+               backgroundColor: opc.color || colors[Math.floor(Math.random() * colors.length)],
+               font: opc.font || Math.floor(Math.random() * 5)
+            } : {}),
+            statusJidList: toArray(opc.jidList),
+            broadcast: true
+         } : {}),
+         quoted: opc.quote || undefined,
+      })
    },
+   
    async groupData(id) {
       
       if (!id) return {}
       
       const data = await sock.groupMetadata(id)
       
-      return gpNormalizeData(data)
+      return gpNormalizeData.call(this, data)
    },
    async fetchGroupsAll() {
       try {
@@ -53,8 +72,7 @@ function gpNormalizeData(data) {
    const isBotAdmin = admins.includes(this.user.lid)
    const users = data.participants.reduce((acc, user) => {
       acc.push({
-         id: user.jid,
-         lid: user.lid,
+         ...user,
          admin: user.admin !== null
       })
       return acc

@@ -1,7 +1,7 @@
 import {
    isJidGroup,
    isLidUser,
-   isJidUser,
+   isPnUser,
    jidNormalizedUser,
    getContentType,
    downloadMediaMessage
@@ -15,19 +15,22 @@ async function fetchMessage(sock, ctx, quote) {
    const isGroup = isJidGroup(from)
    const isLidFrom = isLidUser(from)
    const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
-   const user_pn = jidNormalizedUser(ids.find(i => isJidUser(i)))
+   const user_pn = jidNormalizedUser(ids.find(i => isPnUser(i)))
    const user_lid = jidNormalizedUser(ids.find(i => isLidUser(i)))
    const isOwner = OPC_CONFIG.owner.some(i => [user_lid, user_pn].includes(i))
+   const isMe = ctx.key.fromMe
+   const id = isMe ? sock.user[isLidFrom ? 'lid' : 'id'] : (user_lid || user_pn)
    
    let m = {
       from,
       ...toObject({ isGroup }),
       ...toObject({ isLidFrom }),
-      ...toObject({ id: user_lid || user_pn }),
+      ...toObject({ id }),
       ...toObject({ user_pn }),
       ...toObject({ user_lid }),
       ...toObject({ name: ctx.pushName }),
-      ...toObject({ isOwner })
+      ...toObject({ isOwner }),
+      ...toObject({ isMe: ctx.key.isMe })
    }
    
    const type = getContentType(ctx.message)
