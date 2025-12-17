@@ -76,9 +76,9 @@ export default class Socket extends Events {
       func: async ({ type, messages }) => {
          if (type == 'notify') {
             for (const msg of messages) {
-               
-               if (this.#opc.ignore.ids.includes(msg.key.remoteJid) && !msg.key.fromMe) return
-               if (!isRealMessage(msg, msg.key.id)) return
+               const { remoteJid, id, fromMe } = msg.key
+               if (this.#opc.ignore.ids.includes(remoteJid) && !fromMe) return
+               if (!isRealMessage(msg, id)) return
                
                const m = await fetchMessage(this, msg)
                const params = [m, msg]
