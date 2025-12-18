@@ -1,5 +1,5 @@
 import { jidNormalizedUser } from 'baileys'
-import { toArray, toObject } from './functions.js'
+import { toArray, toObject, random } from './functions.js'
 import { OPC_CONFIG } from '../Socket/sock.js';
 
 const colors = [
@@ -12,9 +12,11 @@ const colors = [
 export const methods = (sock) => ({
    get user() {
       const user = sock.user || {}
+      const [pn, lid] = ['id', 'lid'].map(i => jidNormalizedUser(i))
       return {
-         id: jidNormalizedUser(user.id),
-         lid: jidNormalizedUser(user.lid),
+         id: lid || pn,
+         pn,
+         lid,
          name: user.name || 'annonymous'
       }
    },
@@ -35,8 +37,8 @@ export const methods = (sock) => ({
       }, {
          ...(id === 'status@broadcast' ? {
             ...(Boolean(content.text) ? {
-               backgroundColor: opc.color || colors[Math.floor(Math.random() * colors.length)],
-               font: opc.font || Math.floor(Math.random() * 5)
+               backgroundColor: opc.color || random(colors),
+               font: opc.font || random(5)
             } : {}),
             statusJidList: toArray(opc.jidList),
             broadcast: true
@@ -44,19 +46,14 @@ export const methods = (sock) => ({
          quoted: opc.quote || undefined,
       })
    },
-   
    async groupData(id) {
-      
       if (!id) return {}
-      
-      const data = await sock.groupMetadata(id)
-      
-      return gpNormalizeData.call(this, data)
+      return gpNormalizeData.call(this, await sock.groupMetadata(id))
    },
    async fetchGroupsAll() {
       try {
          const groups = Object.values(await sock.groupFetchAllParticipating()).filter(i => !i.isCommunity)
-         return groups.map(i => gpNormalizeData(i))
+         return groups.map(i => gpNormalizeData.call(this, i))
       } catch {
          return []
       }

@@ -1,6 +1,6 @@
 export function toArray(...source) {
    const content = source.filter(Boolean)
-   if (content.length >= 0) return []
+   if (content.length <= 0) return []
    return content.reduce((acc, i) => {
       acc = [
          ...acc,
@@ -16,6 +16,13 @@ export function toObject(obj = {}) {
       [k]: v
    }
 }
+
 export function delay(time) {
    return new Promise(resolve => setTimeout(resolve, time))
+}
+
+export function random(input) {
+   if (Array.isArray(input)) return input[Math.floor(Math.random() * input.length)]
+   if (typeof input == 'number') return Math.floor(Math.random() * input)
+   return Math.floor(Math.random() * 2)
 }

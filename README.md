@@ -1,159 +1,92 @@
 # WA-SOCK
 
- Es una biblioteca creada a partir de [Baileys](https://github.com/WhiskeySockets/Baileys) y te proporciona una forma mas simple de crear un enchufe.
+ Es una biblioteca creada a partir de [Baileys](https://github.com/WhiskeySockets/Baileys) para simplificar la creación de un enchufe.
 
-## Enlaces
- • [Canal de WhatsApp](https://whatsapp.com/channel/0029Vb6h53bBVJkzchUcxo03)
+ => NOTA: Esta biblioteca fue creada con el fin de facilitarme la creación de un enchufe. No garantizo estabilidad y tampoco futuras actualizaciones usela bajo su propio riesgo. Espero y les resulte util.
 
-## Instalación
-
+## INSTALACION: 
 ```bash
-npm i wa-sock
-```
-# Uso
-## CommonJS
- ```js
- const { Socket } = require("wa-sock");
+npm i git+https://github.com/xv-zv/wa-sock
 ```
 ## ESM
 ```js
-import { Socket } from "wa-sock";
+import Socket from "wa-sock";
 ```
-# Conexión
-
-La conexión se hace mediante el código de 8 digitos 
+## CONEXIÓN:
 
 ```js 
 const bot = new Socket({
-   path: "./Sesion",// ruta de la sesión 
-   phone: "51900000000",// incluir código de pais
-   prefix: "/",// | ["/"] prefijo a usar 
-   newLogin: true, // | false
-})
-```
-# Eventos
- 
- Los eventos te ayudaran obtener información de la conexión 
-
-## Estado y Token 
- ```js 
- 
- // Estado: open | online | close | delete | restart
- 
- bot.ev.on("connection",reazon => {
-  console.log(reazon)
- })
- 
- // Token: código de 8 digitos
- 
- bot.ev.on("token",token => {
-    console.log("Token: " + token)
- })
-
- 
- ```
- ## Comandos 
- 
- ```js
- 
- // Encadenado
- bot.cmd("test", (m, sock, origin) => {
-   m.send("this simple testing", { quote: true })
-});
-
-// Evento
-bot.ev.on("cmds", (m, sock, origin) => {
-   switch (m.body.cmd) {
-      case "test": {
-         m.send("this simple testing")
-         break
-      }
-      default:
+   path: "", // OPCIONAL
+   phone: "", // OBLIGATORIO + CÓDIGO DE PAIS
+   prefix: "", // {string|array} | DEFAULT "/"
+   owner: "", // {string|array} 
+   ignore: {
+      chats: false, //| true
+      groups: false, //| true
+      status: false, //| true
+      ids: [] // INCLUIR IDS A IGNORAR
    }
 })
- ```
-## Otros
 
-```js
-// Solo texto
-bot.ev.on("text", (m , sock , origin) => {
-   console.log("text: ",m)
-})
-
-// Solo media : sticker | image | video | documento | audio 
-bot.ev.on("media", (m , sock , origin) => {
-   console.log("media: ",m)
-})
-
+bot.start()
 ```
-## Enviar media
- De forma simple
+## EVENTOS:
+ 
+### - CODE: 
 
- ```js
+ • El mas importante a incluir para recibir el código de vinculación.
+
+ ```js 
  
- // Text
- m.send("texto aqui")
+bot.on("code", code => {
+   console.log("=> CODIGO: "+ code)
+})
  
- // Imagen 
- m.sendImage(buffer || url , "imagen aqui")
- 
-// video 
- m.sendVideo(buffer || url , "video aqui")
- 
- // Audio 
- m.sendAudio(buffer || url)
- 
- // Document
- m.sendFile(buffer || url , "documento aqui")
  ```
- Con opciones
+ ### - STATUS:  
  
+ • Este emitira estados de la conexión.
  ```js
- 
- // Text
- m.send("texto", {
-    quote: true, //|false 
-    mentions: ["519999999999@s.whatsapp.net"]
- })
- 
- //Image 
- m.sendImage(buffer || url , {
-    desc: "imagen aqui",
-    quote: true,//| false
-    mentions: ["519999999999@s.whatsapp.net"],
-    once: true //|false
- })
- 
- // Video
- m.sendVideo(buffer || url , {
-    desc: "video aqui",
-    quote: true,//|false
-    mentions: ["519999999999@s.whatsapp.net"],
-    once: true //|false
- })
- 
- // Audio
- m.sendAudio(buffer || url , {
-    quote: true,//|false
-    once: true //|false
- })
- 
- // Document
-  m.sendFile(buffer || url , {
-    desc: "documento aqui",
-    quote: true,//|false
-    mentions: ["519999999999@s.whatsapp.net"],
-    name: "nombre del archivo",
-    size: 1,// 1mb opcional
-    once: true//|false
- })
- 
- // Encuesta
- 
- m.sendPoll({
-    name: "nombre de la encuesta",
-    opc: ["opcion1","opcion2","...opc8"],
-    quote: true , //default false
-    mentions: ["519999999999@s.whatsapp.net"]
+ bot.on("status", reazon => {
+   console.log("=> STATUS: "+ reazon)
+})
+ ```
+### - TEXT Y MEDIA: 
+ • Aqui se emitira mensajes de solo texto y media.
+ ```js
+ // TEXT
+ bot.on("text", (m, msg) => {
+   console.log("=> TEXT: "+ m)
+})
+// MEDIA
+bot.on("media", (m, msg) => {
+   console.log("=> MEDIA: "+ m)
+})
+ ```
+ ## COMANDS: 
+  • La conexión también emite comandos.
+ ```js
+ bot.cmd("test", (m , msg) => {
+    m.reply("Esto es una prueba")
+    console.log(m)
  })
  ```
+ 
+ ## EJEMPLO: 
+  • Uselo para orientarse al crear el enchufe.
+  
+  ```js
+  import Socket from "wa-sock";
+  
+  const bot = new Socket({
+     phone: "521215xxxxxx"
+  })
+  
+  bot.on("code", console.log)
+  bot.on("status", console.log)
+  bot.cmd("hola", m => {
+     m.reply("Hola como estas ?")
+  })
+  
+  bot.start()
+  ```

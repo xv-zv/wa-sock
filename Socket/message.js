@@ -11,20 +11,17 @@ import { toArray, toObject } from '../Utils/index.js';
 
 async function fetchMessage(sock, ctx, quote) {
    
-   const from = jidNormalizedUser(ctx.key.remoteJid)
+   const from = ctx.key.remoteJid
    const isGroup = isJidGroup(from)
-   const isLidFrom = isLidUser(from)
-   const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
-   const user_pn = jidNormalizedUser(ids.find(i => isPnUser(i)))
-   const user_lid = jidNormalizedUser(ids.find(i => isLidUser(i)))
-   const isOwner = OPC_CONFIG.owner.some(i => [user_lid, user_pn].includes(i))
    const isMe = ctx.key.fromMe
-   const id = isMe ? sock.user[isLidFrom ? 'lid' : 'id'] : (user_lid || user_pn)
+   const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
+   const [user_pn, user_lid] = ['pn', 'lid'].map(i => isMe ? sock.user[i] : jidNormalizedUser(ids.find(k => k.endsWith(i == 'pn' ? 'net' : i))))
+   const id = user_lid || user_pn
+   const isOwner = OPC_CONFIG.owner.includes(id)
    
    let m = {
       from,
       ...toObject({ isGroup }),
-      ...toObject({ isLidFrom }),
       ...toObject({ id }),
       ...toObject({ user_pn }),
       ...toObject({ user_lid }),
@@ -109,7 +106,7 @@ async function fetchMessage(sock, ctx, quote) {
                expiration: opc.ephemeral || m.ephemeral,
                mentionedJid: toArray(opc.mentions || [])
             }
-         }, { quoted: opc.quote || ctx })
+         }, { quote: opc.quote || ctx })
       }
       m.react = function(text) {
          return sock.sendMessage(m.from, {

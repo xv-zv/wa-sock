@@ -1,4 +1,4 @@
-export let OPC_CONFIG = {
+export let DEFAULT_OPC = {
    phone: undefined,
    path: './Sesion',
    owner: [],

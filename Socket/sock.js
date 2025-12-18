@@ -49,7 +49,7 @@ export default class Socket extends Events {
          logger: pino({ level: 'silent' }),
          auth,
          version,
-         shouldIgnoreJid(id) {
+         shouldIgnoreJid: id => {
             const { groups, chats, status } = this.#opc.ignore
             return (isJidGroup(id) ? groups : chats) || isJidBroadcast(id) ? status : false
          }
@@ -61,8 +61,11 @@ export default class Socket extends Events {
       for (const { event, func } of events) {
          this.#sock.ev.on(event, func)
       }
-      
+      return {
+         isOnline: this.isOnline
+      }
    }
+   
    online = false
    close = () => {
       if (!this.isOnline) return

@@ -6,14 +6,10 @@
       ".": "./Socket/sock.js",
       "./utils": "./Utils/functions.js"
    },
-   "repository": {
-      "type": "git",
-      "url": "git+https://github.com/xv-zv/wa-sock.git"
-   },
    "author": "Vy Svn",
    "license": "ISC",
    "homepage": "https://github.com/xv-zv/wa-sock#readme",
    "dependencies": {
-      "baileys": "^6.7.21"
+      "baileys": "^7.0.0-rc.9"
    }
 }
