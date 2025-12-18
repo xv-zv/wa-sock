@@ -1,13 +1,7 @@
 export function toArray(...source) {
    const content = source.filter(Boolean)
    if (content.length <= 0) return []
-   return content.reduce((acc, i) => {
-      acc = [
-         ...acc,
-         ...(Array.isArray(i) ? i : [i])
-      ]
-      return acc
-   }, [])
+   return [...new Set(content.flat())];
 }
 
 export function toObject(obj = {}) {
