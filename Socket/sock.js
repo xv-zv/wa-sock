@@ -21,12 +21,12 @@ export default class Socket extends Events {
       OPC_CONFIG = this.#opc = {
          ...DEFAULT_OPC,
          ...opc,
-         prefix: toArray(opc.prefix, DEFAULT_OPC),
+         prefix: toArray(opc.prefix, DEFAULT_OPC.prefix),
          owner: toArray(opc.owner, DEFAULT_OPC.owner),
          ignore: {
             ...DEFAULT_OPC.ignore,
             ...(opc.ignore || {}),
-            ids: toArray(opc.ignore.ids)
+            ids: toArray(opc.ignore?.ids)
          }
       }
    }
