@@ -136,5 +136,9 @@ export default class Socket extends Events {
    {
       event: 'creds.update',
       func: saveCreds
+   },
+   {
+      event: 'contacts.upsert',
+      func: console.log
    }]
 }

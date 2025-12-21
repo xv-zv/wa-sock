@@ -10,6 +10,6 @@
    "license": "ISC",
    "homepage": "https://github.com/xv-zv/wa-sock#readme",
    "dependencies": {
-      "baileys": "^7.0.0-rc.9"
+      "baileys": "^6.7.21"
    }
 }
