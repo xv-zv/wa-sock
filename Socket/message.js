@@ -1,7 +1,5 @@
 import {
    isJidGroup,
-   isLidUser,
-   isPnUser,
    jidNormalizedUser,
    getContentType,
    downloadMediaMessage
@@ -21,13 +19,13 @@ async function fetchMessage(sock, ctx, quote) {
    
    let m = {
       from,
-      ...toObject({ isGroup }),
-      ...toObject({ id }),
-      ...toObject({ user_pn }),
-      ...toObject({ user_lid }),
-      ...toObject({ name: ctx.pushName }),
-      ...toObject({ isOwner }),
-      ...toObject({ isMe: ctx.key.isMe })
+      isGroup,
+      id,
+      user_pn,
+      user_lid,
+      name: ctx.pushName,
+      isOwner,
+      isMe: ctx.key.fromMe
    }
    
    const type = getContentType(ctx.message)
@@ -47,12 +45,12 @@ async function fetchMessage(sock, ctx, quote) {
             ...m,
             isCmd,
             cmd,
-            ...toObject({ text })
+            text
          }
       } else {
          m = {
             ...m,
-            ...toObject({ text: body })
+            text: body
          }
       }
    }
@@ -65,8 +63,8 @@ async function fetchMessage(sock, ctx, quote) {
             isMedia: true,
             type: type.replace('Message', ''),
             mime: msg.mimetype,
-            ...toObject({ isAnimated: msg.isAnimated }),
-            ...toObject({ duration: msg.seconds }),
+            isAnimated: msg.isAnimated,
+            duration: msg.seconds,
             media: () => downloadMediaMessage(ctx, 'buffer')
          }
       }
@@ -77,8 +75,8 @@ async function fetchMessage(sock, ctx, quote) {
          
          m = {
             ...m,
-            ...toObject({ mentions: info.mentionedJid }),
-            ...toObject({ ephemeral: info.expiration })
+            mentions: info.mentionedJid,
+            ephemeral: info.expiration
          }
          
          if (info.quotedMessage) {
@@ -89,7 +87,7 @@ async function fetchMessage(sock, ctx, quote) {
                   remoteJid: info.remoteJid || from,
                   participant: info.participant,
                   id: info.stanzaId,
-                  fromMe: false // modify
+                  fromMe: [sock.user.lid, sock.user.pn].includes(jidNormalizedUser(info.participant))
                },
                message: info.quotedMessage
             }, true)
@@ -115,6 +113,6 @@ async function fetchMessage(sock, ctx, quote) {
       }
    }
    
-   return m
+   return toObject(m)
 }
 export default fetchMessage

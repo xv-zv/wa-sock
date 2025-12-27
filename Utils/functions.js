@@ -5,10 +5,7 @@ export function toArray(...source) {
 }
 
 export function toObject(obj = {}) {
-   const [k, v] = Object.entries(obj)[0] || []
-   return (!v || (Array.isArray(v) && !v.length)) ? {} : {
-      [k]: v
-   }
+   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v && (!Array.isArray || v.length)))
 }
 
 export function delay(time) {
