@@ -5,7 +5,7 @@ export function toArray(...source) {
 }
 
 export function toObject(obj = {}) {
-   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v && (!Array.isArray || v.length)))
+   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v && (!Array.isArray(v) || v.length)))
 }
 
 export function delay(time) {
