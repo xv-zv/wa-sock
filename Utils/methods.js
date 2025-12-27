@@ -12,7 +12,7 @@ const colors = [
 export const methods = (sock) => ({
    get user() {
       const user = sock.user || {}
-      const [pn, lid] = ['id', 'lid'].map(i => jidNormalizedUser(i))
+      const [pn, lid] = ['id', 'lid'].map(i => jidNormalizedUser(user[i]))
       return {
          id: lid || pn,
          pn,
