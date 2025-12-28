@@ -27,7 +27,7 @@ export default class Socket extends Events {
          ignore: {
             ...DEFAULT_OPC.ignore,
             ...(opc.ignore || {}),
-            ids: toArray(opc.ignore?.ids)
+            has: (typeof opc.ignore.has) !== 'function' ? DEFAULT_OPC.ignore.has : opc.ignore.has
          },
          code: opc.code.length == 8 ? opc.code.toUpperCase() : DEFAULT_OPC.code
       }
@@ -81,9 +81,12 @@ export default class Socket extends Events {
       func: async ({ type, messages }) => {
          if (type == 'notify') {
             for (const msg of messages) {
-               const { remoteJid, id, fromMe } = msg.key
-               if (this.#opc.ignore.ids.includes(remoteJid) && !fromMe) continue
-               if (!isRealMessage(msg, id)) continue
+               
+               const { remoteJid, participant } = msg.key
+               
+               const isGroup = isJidGroup(remoteJid)
+               
+               if (this.#opc.ignore.has(isGroup ? remoteJid : participant)) continue
                
                const m = await fetchMessage(this, msg)
                const params = [m, msg]
@@ -91,6 +94,12 @@ export default class Socket extends Events {
                if (m.isCmd) this.emitCmd(m.cmd, ...params)
                if (m.isMedia) this.emit('media', ...params)
                if (!m.isCmd && !m.isMedia) this.emit('text', ...params)
+               if (!isGroup) this.emit('contacts', [{
+                  id: m.id,
+                  lid: m.lid,
+                  name: m.name
+               }])
+               
             }
          }
       }
@@ -141,6 +150,9 @@ export default class Socket extends Events {
    },
    {
       event: 'contacts.upsert',
-      func: console.log
+      func: contacts => {
+         if (contacts.length == 0) return
+         this.emit('contacts', contacts)
+      }
    }]
 }

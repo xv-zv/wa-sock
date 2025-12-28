@@ -7,7 +7,7 @@ export let DEFAULT_OPC = {
       groups: false,
       chats: false,
       status: false,
-      ids: []
+      has: () => false
    },
    code: 'VYSVNXVZ'
 }
