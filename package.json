@@ -1,6 +1,6 @@
 {
    "name": "wa-sock",
-   "version": "2.0.1",
+   "version": "2.0.2",
    "description": "Una conexión simple",
    "exports": {
       ".": "./Socket/sock.js",
@@ -10,6 +10,6 @@
    "license": "ISC",
    "homepage": "https://github.com/xv-zv/wa-sock#readme",
    "dependencies": {
-      "baileys": "6.7.21"
+      "baileys": "6.8.0"
    }
 }
