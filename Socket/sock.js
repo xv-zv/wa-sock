@@ -27,9 +27,9 @@ export default class Socket extends Events {
          ignore: {
             ...DEFAULT_OPC.ignore,
             ...(opc.ignore || {}),
-            has: (typeof opc.ignore.has) !== 'function' ? DEFAULT_OPC.ignore.has : opc.ignore.has
+            has: (typeof opc.ignore?.has) !== 'function' ? DEFAULT_OPC.ignore?.has : opc.ignore.has
          },
-         code: opc.code.length == 8 ? opc.code.toUpperCase() : DEFAULT_OPC.code
+         code: opc.code?.length == 8 ? opc.code.toUpperCase() : DEFAULT_OPC.code
       }
    }
    
