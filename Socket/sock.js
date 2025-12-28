@@ -3,7 +3,8 @@ import makeWASocket, {
    fetchLatestBaileysVersion,
    DisconnectReason,
    isRealMessage,
-   isJidGroup
+   isJidGroup,
+   isJidBroadcast
 } from 'baileys';
 import pino from 'pino';
 import ws from 'ws';
@@ -27,7 +28,8 @@ export default class Socket extends Events {
             ...DEFAULT_OPC.ignore,
             ...(opc.ignore || {}),
             ids: toArray(opc.ignore?.ids)
-         }
+         },
+         code: opc.code.length == 8 ? opc.code.toUpperCase() : DEFAULT_OPC.code
       }
    }
    
@@ -80,7 +82,7 @@ export default class Socket extends Events {
          if (type == 'notify') {
             for (const msg of messages) {
                const { remoteJid, id, fromMe } = msg.key
-               if (this.#opc.ignore.ids.includes(remoteJid) && !fromMe) continue 
+               if (this.#opc.ignore.ids.includes(remoteJid) && !fromMe) continue
                if (!isRealMessage(msg, id)) continue
                
                const m = await fetchMessage(this, msg)
