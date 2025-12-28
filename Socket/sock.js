@@ -80,8 +80,8 @@ export default class Socket extends Events {
          if (type == 'notify') {
             for (const msg of messages) {
                const { remoteJid, id, fromMe } = msg.key
-               if (this.#opc.ignore.ids.includes(remoteJid) && !fromMe) return
-               if (!isRealMessage(msg, id)) return
+               if (this.#opc.ignore.ids.includes(remoteJid) && !fromMe) continue 
+               if (!isRealMessage(msg, id)) continue
                
                const m = await fetchMessage(this, msg)
                const params = [m, msg]
