@@ -1,5 +1,5 @@
 import { jidNormalizedUser } from 'baileys'
-import { toArray, toObject, random } from './functions.js'
+import { toArray, toObject, random, getNumber } from './functions.js'
 import { OPC_CONFIG } from '../Socket/sock.js';
 
 const colors = [
@@ -45,6 +45,46 @@ export const methods = (sock) => ({
          } : {}),
          quoted: opc.quote || undefined,
       })
+   },
+   async sendContact(id, content, opc = {}) {
+      content = toArray(content)
+      const contacts = []
+      for (const { name, phone } of content) {
+         if (!phone.endsWith('net')) continue
+         const business = await sock.getBusinessProfile(phone)
+         const isBusiness = Boolean(business)
+         
+         const [name1, name2] = name.split(' ')
+         const res = getNumber(phone)
+         if (!res.isValid) continue
+         
+         const vcard = [
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            `N:${name2 || ''};${name1};;;`,
+            `FN:${name}`,
+            ...(isBusiness ? [`ORG:${name1}`] : [])
+            `item1.TEL;waid=${res.number}:${res.inter}`,
+            'item1.X-ABLabel:Móvil',
+            ...(isBusiness ? [
+               `X-WA-BIZ-NAME:,${name}`,
+               `X-WA-BIZ-DESCRIPTION:${business.description}`
+            ] : []),
+            'END:VCARD'
+         ].join('\n')
+         
+         contacts.push({
+            displayName: name,
+            vcard
+         })
+      }
+      if (contacts.length == 0) return
+      this.sendMessage(id, {
+         contacts: {
+            displayName: `${contacts.length} contactos`,
+            contacts
+         }
+      }, opc)
    },
    async groupData(id) {
       if (!id) return {}

@@ -10,6 +10,7 @@
    "license": "ISC",
    "homepage": "https://github.com/xv-zv/wa-sock#readme",
    "dependencies": {
+      "awesome-phonenumber": "^7.6.0",
       "baileys": "7.0.0-rc.9"
    }
 }

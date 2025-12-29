@@ -1,3 +1,5 @@
+import PhoneNumber from 'awesome-phonenumber'
+
 export function toArray(...source) {
    const content = source.filter(Boolean)
    if (content.length <= 0) return []
@@ -16,4 +18,14 @@ export function random(input) {
    if (Array.isArray(input)) return input[Math.floor(Math.random() * input.length)]
    if (typeof input == 'number') return Math.floor(Math.random() * input)
    return Math.floor(Math.random() * 2)
+}
+
+export function getNumber(number) {
+   number = number.replace(/\D/g, '')
+   const res = PhoneNumber('+', number)
+   return {
+      isValid: res.valid,
+      number,
+      inter: res.number.international
+   }
 }
