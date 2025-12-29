@@ -95,8 +95,8 @@ export default class Socket extends Events {
                if (m.isMedia) this.emit('media', ...params)
                if (!m.isCmd && !m.isMedia) this.emit('text', ...params)
                if (!isGroup) this.emit('contacts', [{
-                  id: m.id,
-                  lid: m.lid,
+                  id: m.user_pn,
+                  lid: m.user_lid,
                   name: m.name
                }])
                

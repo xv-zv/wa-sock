@@ -49,13 +49,14 @@ export const methods = (sock) => ({
    async sendContact(id, content, opc = {}) {
       content = toArray(content)
       const contacts = []
-      for (const { name, phone } of content) {
+      for (const { name, phone, ...data } of content) {
          if (!phone.endsWith('net')) continue
          const business = await sock.getBusinessProfile(phone)
          const isBusiness = Boolean(business)
          
          const [name1, name2] = name.split(' ')
          const res = getNumber(phone)
+         
          if (!res.isValid) continue
          
          const vcard = [
@@ -63,15 +64,15 @@ export const methods = (sock) => ({
             'VERSION:3.0',
             `N:${name2 || ''};${name1};;;`,
             `FN:${name}`,
-            ...(isBusiness ? [`ORG:${name1}`] : [])
             `item1.TEL;waid=${res.number}:${res.inter}`,
             'item1.X-ABLabel:Móvil',
             ...(isBusiness ? [
+               `ORG:${data.org || name1}`
                `X-WA-BIZ-NAME:,${name}`,
-               `X-WA-BIZ-DESCRIPTION:${business.description}`
+               `X-WA-BIZ-DESCRIPTION:${data.desc || business.description}`
             ] : []),
             'END:VCARD'
-         ].join('\n')
+         ].join('\n').trim()
          
          contacts.push({
             displayName: name,

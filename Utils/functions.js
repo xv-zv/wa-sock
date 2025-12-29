@@ -22,10 +22,11 @@ export function random(input) {
 
 export function getNumber(number) {
    number = number.replace(/\D/g, '')
-   const res = PhoneNumber('+', number)
+   const res = PhoneNumber('+' +number)
    return {
       isValid: res.valid,
       number,
-      inter: res.number.international
+      inter: res.number?.international,
+      nat: res.number?.national
    }
 }
