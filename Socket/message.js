@@ -15,7 +15,8 @@ async function fetchMessage(sock, ctx, quote) {
    const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
    const [user_pn, user_lid] = ['pn', 'lid'].map(i => isMe ? sock.user[i] : jidNormalizedUser(ids.find(k => k.endsWith(i == 'pn' ? 'net' : i))))
    const id = user_lid || user_pn
-   const isOwner = OPC_CONFIG.owner.includes(id)
+   
+   const isOwner = OPC_CONFIG.owner.includes(id) || isMe
    
    let m = {
       from,
@@ -25,7 +26,7 @@ async function fetchMessage(sock, ctx, quote) {
       user_lid,
       name: ctx.pushName,
       isOwner,
-      isMe: ctx.key.fromMe
+      isMe
    }
    
    const type = getContentType(ctx.message)
