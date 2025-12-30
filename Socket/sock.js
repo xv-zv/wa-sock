@@ -10,7 +10,7 @@ import pino from 'pino';
 import ws from 'ws';
 import fs from 'fs/promises';
 import { DEFAULT_OPC } from '../Defaults/index.js';
-import { Events, methods, toArray } from '../Utils/index.js';
+import { Events, methods, normalizeConfig } from '../Utils/index.js';
 import fetchMessage from './message.js';
 
 export let OPC_CONFIG = {}
@@ -19,18 +19,7 @@ export default class Socket extends Events {
    #sock
    constructor(opc = {}) {
       super()
-      OPC_CONFIG = this.#opc = {
-         ...DEFAULT_OPC,
-         ...opc,
-         prefix: toArray(opc.prefix, DEFAULT_OPC.prefix),
-         owner: toArray(opc.owner, DEFAULT_OPC.owner),
-         ignore: {
-            ...DEFAULT_OPC.ignore,
-            ...(opc.ignore || {}),
-            has: (typeof opc.ignore?.has) !== 'function' ? DEFAULT_OPC.ignore?.has : opc.ignore.has
-         },
-         code: opc.code?.length == 8 ? opc.code.toUpperCase() : DEFAULT_OPC.code
-      }
+      OPC_CONFIG = this.#opc = normalizeConfig(DEFAULT_OPC, opc)
    }
    
    get isOnline() {
@@ -82,7 +71,7 @@ export default class Socket extends Events {
          if (type == 'notify') {
             for (const msg of messages) {
                
-               if(!isRealMessage(msg)) continue
+               if (!isRealMessage(msg)) continue
                const { remoteJid, participant, fromMe } = msg.key
                
                const isGroup = isJidGroup(remoteJid)

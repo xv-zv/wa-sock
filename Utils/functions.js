@@ -45,7 +45,7 @@ export function deepFreeze(obj) {
    return obj
 }
 
-export function normalizeObject(base = {}, input = {}, freeze = false) {
+export function normalizeConfig(base = {}, input = {}) {
    
    const res = {}
    
@@ -60,12 +60,17 @@ export function normalizeObject(base = {}, input = {}, freeze = false) {
       }
       
       if (isObject(baseVal)) {
-         res[i] = normalizeObject(baseVal, isObject(inputVal) ? inputVal : {}, freeze)
+         res[i] = normalizeObject(baseVal, isObject(inputVal) ? inputVal : {})
+         continue
+      }
+      
+      if (i == 'code') {
+         res[i] = inputVal.length == 8 ? inputVal.toUpperCase() : baseVal
          continue
       }
       
       res[i] = inputVal !== undefined ? inputVal : baseVal
       
    }
-   return freeze ? deepFreeze(res) : res
+   return res
 }

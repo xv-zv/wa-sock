@@ -23,7 +23,7 @@ export const methods = (sock) => ({
    async fetchCode(phone) {
       if (!phone) return 'NOTF-OUND'
       phone = phone.replace(/\D/g, '')
-      const code = await sock.requestPairingCode(phone, OPC_CONFIG.code)
+      const code = await sock.requestPairingCode(phone, OPC_CONFIG.code.toUpperCase())
       return code.match(/.{1,4}/g).join('-')
    },
    sendMessage(id, content, opc = {}) {
