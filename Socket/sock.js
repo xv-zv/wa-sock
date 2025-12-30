@@ -83,11 +83,11 @@ export default class Socket extends Events {
             for (const msg of messages) {
                
                if(!isRealMessage(msg)) continue
-               const { remoteJid, participant } = msg.key
+               const { remoteJid, participant, fromMe } = msg.key
                
                const isGroup = isJidGroup(remoteJid)
                const ignore = this.#opc.ignore.has
-               if (ignore(remoteJid) || ignore(participant)) continue
+               if (!fromMe && (ignore(remoteJid) || ignore(participant))) continue
                
                const m = await fetchMessage(this, msg)
                const params = [m, msg]
