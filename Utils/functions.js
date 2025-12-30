@@ -22,11 +22,50 @@ export function random(input) {
 
 export function getNumber(number) {
    number = number.replace(/\D/g, '')
-   const res = PhoneNumber('+' +number)
+   const res = PhoneNumber('+' + number)
    return {
       isValid: res.valid,
       number,
       inter: res.number?.international,
       nat: res.number?.national
    }
+}
+
+export function isObject(obj) {
+   return obj !== null && typeof obj == 'object' && !Array.isArray(obj)
+}
+
+export function deepFreeze(obj) {
+   if (!isObject(obj)) return
+   Object.freeze(obj)
+   for (const key in obj) {
+      const val = obj[key]
+      if (isObject(val) && !Object.isFrozen(val)) deepFreeze(val)
+   }
+   return obj
+}
+
+export function normalizeObject(base = {}, input = {}, freeze = false) {
+   
+   const res = {}
+   
+   for (const i in base) {
+      
+      const baseVal = base[i]
+      const inputVal = input[i]
+      
+      if (Array.isArray(baseVal)) {
+         res[i] = toArray(baseVal, inputVal)
+         continue
+      }
+      
+      if (isObject(baseVal)) {
+         res[i] = normalizeObject(baseVal, isObject(inputVal) ? inputVal : {}, freeze)
+         continue
+      }
+      
+      res[i] = inputVal !== undefined ? inputVal : baseVal
+      
+   }
+   return freeze ? deepFreeze(res) : res
 }
