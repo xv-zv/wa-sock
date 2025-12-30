@@ -65,7 +65,7 @@ export function normalizeConfig(base = {}, input = {}) {
       }
       
       if (i == 'code') {
-         res[i] = inputVal.length == 8 ? inputVal.toUpperCase() : baseVal
+         res[i] = inputVal?.length == 8 ? inputVal.toUpperCase() : baseVal
          continue
       }
       
