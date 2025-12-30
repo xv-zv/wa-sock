@@ -60,7 +60,7 @@ export function normalizeConfig(base = {}, input = {}) {
       }
       
       if (isObject(baseVal)) {
-         res[i] = normalizeObject(baseVal, isObject(inputVal) ? inputVal : {})
+         res[i] = normalizeConfig(baseVal, isObject(inputVal) ? inputVal : {})
          continue
       }
       
