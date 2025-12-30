@@ -100,12 +100,8 @@ async function fetchMessage(sock, ctx, quote) {
       
       m.reply = function(text, opc = {}) {
          return sock.sendMessage(opc.from || from, {
-            text,
-            contextInfo: {
-               expiration: opc.ephemeral || m.ephemeral,
-               mentionedJid: toArray(opc.mentions || [])
-            }
-         }, { quote: opc.quote || ctx })
+            text
+         }, { ...opc, ephemeral: opc.ephemeral || m.ephemeral })
       }
       m.react = function(text) {
          return sock.sendMessage(m.from, {
