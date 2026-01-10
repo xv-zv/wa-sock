@@ -9,25 +9,22 @@ import { toArray, toObject } from '../Utils/index.js';
 
 async function fetchMessage(sock, ctx, quote) {
    
-   const from = ctx.key.remoteJid
-   const isGroup = isJidGroup(from)
-   const isMe = ctx.key.fromMe
-   const ids = Object.values(ctx.key).filter(i => /\d+@\D/.test(i))
-   const [user_pn, user_lid] = ['pn', 'lid'].map(i => isMe ? sock.user[i] : jidNormalizedUser(ids.find(k => k.endsWith(i == 'pn' ? 'net' : i))))
-   const id = user_lid || user_pn
-   
-   const isOwner = OPC_CONFIG.owner.includes(id) || isMe
-   
    let m = {
-      from,
-      isGroup,
-      id,
-      user_pn,
-      user_lid,
-      name: ctx.pushName,
-      isOwner,
-      isMe
+      from: ctx.key.remoteJid,
    }
+   
+   m.isGroup = isJidGroup(m.from)
+   m.isMe = ctx.key.fromMe
+   
+   const ids = Object.values(m.isMe ? sock.user : ctx.key).filter(i => /\d+@\D/.test(i))
+   const user_lid = ids.find(i => i.endsWith('lid'))
+   const user_pn = jidNormalizedUser(ids.find(i => i.endsWith('net')))
+   
+   m.id = user_lid || user_pn
+   m.name = ctx.pushName
+   m.user_lid = user_lid
+   m.user_pn = user_pn
+   m.isOwner = OPC_CONFIG.owner.includes(m.id) || m.isMe
    
    const type = getContentType(ctx.message)
    const msg = ctx.message[type] || {}
@@ -36,23 +33,15 @@ async function fetchMessage(sock, ctx, quote) {
    if (body) {
       
       const isCmd = OPC_CONFIG.prefix.some(i => body.startsWith(i))
+      const [cmd, ...args] = body.trim().slice(1).split(/ +/)
       
-      if (isCmd && !quote) {
-         
-         const [cmd, ...args] = body.trim().slice(1).split(/ +/)
-         const text = args.join(' ')
-         
-         m = {
-            ...m,
+      m = {
+         ...m,
+         ...((isCmd && !quote) ? {
             isCmd,
-            cmd,
-            text
-         }
-      } else {
-         m = {
-            ...m,
-            text: body
-         }
+            cmd: cmd.toLowerCase(),
+            text: args.join(' ')
+         } : { text: body })
       }
    }
    

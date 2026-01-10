@@ -1,6 +1,6 @@
 import { jidNormalizedUser } from 'baileys'
-import { toArray, toObject, random, getNumber } from './functions.js'
-import { OPC_CONFIG } from '../Socket/sock.js';
+import { toArray, toObject, random, getNumber } from '../Utils/index.js'
+import { OPC_CONFIG } from './sock.js';
 
 const colors = [
    '#FFFFFF', '#000000', '#075E54', '#128C7E', '#25D366',
@@ -24,7 +24,7 @@ export const methods = (sock) => ({
       if (!phone) return 'NOTF-OUND'
       phone = phone.replace(/\D/g, '')
       const code = await sock.requestPairingCode(phone, OPC_CONFIG.code.toUpperCase())
-      return code.match(/.{1,4}/g).join('-')
+      return code.match(/.{1,4}/g)?.join('-')
    },
    sendMessage(id, content, opc = {}) {
       return sock.sendMessage(id, {
@@ -49,10 +49,12 @@ export const methods = (sock) => ({
    async sendContact(id, content, opc = {}) {
       content = toArray(content)
       const contacts = []
+      
       for (const { name, phone, ...data } of content) {
+         
          if (!phone.endsWith('net')) continue
+         
          const business = await sock.getBusinessProfile(phone)
-         const isBusiness = Boolean(business)
          
          const [name1, name2] = name.split(' ')
          const res = getNumber(phone)
@@ -66,9 +68,9 @@ export const methods = (sock) => ({
             `FN:${name}`,
             `item1.TEL;waid=${res.number}:${res.inter}`,
             'item1.X-ABLabel:Móvil',
-            ...(isBusiness ? [
+            ...(business ? [
                `ORG:${data.org || name1}`
-               `X-WA-BIZ-NAME:,${name}`,
+               `X-WA-BIZ-NAME:${name}`,
                `X-WA-BIZ-DESCRIPTION:${data.desc || business.description}`
             ] : []),
             'END:VCARD'
@@ -118,7 +120,7 @@ function gpNormalizeData(data) {
    
    return {
       id: data.id,
-      name: data.subject,
+      name: data.subject || 'annonymous',
       owner: {
          id: data.ownerJid,
          lid: data.owner,

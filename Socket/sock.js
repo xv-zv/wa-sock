@@ -57,7 +57,6 @@ export default class Socket extends Events {
       }
    }
    
-   online = false
    close = () => {
       if (!this.isOnline) return
       this.#sock.ev.removeAllListeners()
@@ -69,13 +68,16 @@ export default class Socket extends Events {
       event: 'messages.upsert',
       func: async ({ type, messages }) => {
          if (type == 'notify') {
+            
+            const ignore = this.#opc.ignore.has
+            
             for (const msg of messages) {
                
                if (!isRealMessage(msg)) continue
                const { remoteJid, participant, fromMe } = msg.key
                
                const isGroup = isJidGroup(remoteJid)
-               const ignore = this.#opc.ignore.has
+               
                if (!fromMe && (ignore(remoteJid) || ignore(participant))) continue
                
                const m = await fetchMessage(this, msg)
@@ -129,7 +131,6 @@ export default class Socket extends Events {
             setTimeout(this.start, 4500)
             
          } else if (isOnline || isOpen) {
-            if (isOnline) this.online = true
             emit(isOnline ? 'online' : 'open')
          }
       }
