@@ -1,13 +1,16 @@
-import { jidNormalizedUser } from 'baileys'
-import { toArray, toObject, random, getNumber } from '../Utils/index.js'
 import { OPC_CONFIG } from './sock.js';
+import { colors } from '../../Defaults/index.js';
+import {
+   jidNormalizedUser,
+   S_WHATSAPP_NET
+} from 'baileys';
+import {
+   toArray,
+   toObject,
+   random,
+   getNumber
+} from '../Utils/index.js';
 
-const colors = [
-   '#FFFFFF', '#000000', '#075E54', '#128C7E', '#25D366',
-   '#34B7F1', '#FFB900', '#FF6F61', '#C850C0', '#FF3B30',
-   '#1E90FF', '#315575', '#6C5CE7', '#FFC107', '#008080',
-   '#4CAF50', '#F44336', '#3F51B5', '#E91E63', '#795548'
-];
 
 export const methods = (sock) => ({
    get user() {
@@ -19,6 +22,17 @@ export const methods = (sock) => ({
          lid,
          name: user.name || 'annonymous'
       }
+   },
+   async getPNForLID(id) {
+      if (!id.endsWith('lid')) return
+      const func = sock.signalRepository.lidMapping.getPNForLID
+      const result = typeof func == 'function' ? await func(id) : sock.signalRepository.lidMapping.mappingCache.get(`lid:${id.replace(/\D/g,'')}`) + S_WHATSAPP_NET
+      return jidNormalizedUser(result)
+   },
+   async getLIDForPN(id) {
+      if (!id.endsWith(S_WHATSAPP_NET)) return
+      const res = await sock.signalRepository.lidMapping.pnToLIDFunc(toArray(id))
+      return jidNormalizedUser(res?.[0]?.pn)
    },
    async fetchCode(phone) {
       if (!phone) return 'NOTF-OUND'
@@ -84,7 +98,7 @@ export const methods = (sock) => ({
       if (contacts.length == 0) return
       this.sendMessage(id, {
          contacts: {
-            displayName: `${contacts.length} contactos`,
+            displayName: contacts.length > 1 ? `${contacts.length} contactos` : content[0]?.name,
             contacts
          }
       }, opc)
@@ -110,15 +124,12 @@ function gpNormalizeData(data) {
    const admins = data.participants.filter(i => i.admin !== null).map(i => i.lid)
    const isComm = data.isCommunity
    const isBotAdmin = admins.includes(this.user.lid)
-   const users = data.participants.reduce((acc, user) => {
-      acc.push({
-         ...user,
-         admin: user.admin !== null
-      })
-      return acc
-   }, [])
+   const users = data.participants.map(user => ({
+      ...i,
+      admin: user.admin !== null
+   }))
    
-   return {
+   return toObject({
       id: data.id,
       name: data.subject || 'annonymous',
       owner: {
@@ -129,11 +140,11 @@ function gpNormalizeData(data) {
       size: data.size,
       creation: data.creation,
       open: !data.announce,
-      ...(isComm && { isComm }),
+      isComm,
       ...(isComm && { parent: data.linkedParent }),
-      ...toObject({ isBotAdmin }),
+      isBotAdmin,
       users,
-      ...toObject({ ephemeral: data.ephemeralDuration }),
-      ...toObject({ desc: data.desc })
-   }
+      ephemeral: data.ephemeralDuration,
+      desc: data.desc
+   })
 }

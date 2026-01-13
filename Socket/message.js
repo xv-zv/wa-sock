@@ -100,5 +100,13 @@ async function fetchMessage(sock, ctx, quote) {
    }
    
    return toObject(m)
+   
+   function getPNforLID(lid) {
+      if(!lid.endsWith('lid')) return 
+      const cache = sock.signalRepository.lidMapping.mappingCache.get
+      const func = sock.signalRepository.lidMapping.getPNForLID
+      
+   }
+   
 }
 export default fetchMessage
