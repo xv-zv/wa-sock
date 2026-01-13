@@ -18,7 +18,7 @@ async function fetchMessage(sock, ctx, quote) {
    
    const ids = Object.values(m.isMe ? sock.user : ctx.key).filter(i => /\d+@\D/.test(i))
    const user_lid = ids.find(i => i.endsWith('lid'))
-   const user_pn = jidNormalizedUser(ids.find(i => i.endsWith('net')))
+   const user_pn = jidNormalizedUser(ids.find(i => i.endsWith('net'))) || await sock.getPNforLID(user_lid)
    
    m.id = user_lid || user_pn
    m.name = ctx.pushName
@@ -74,7 +74,7 @@ async function fetchMessage(sock, ctx, quote) {
             m.isQuote = true
             m.quote = await fetchMessage(sock, {
                key: {
-                  remoteJid: info.remoteJid || from,
+                  remoteJid: info.remoteJid || m.from,
                   participant: info.participant,
                   id: info.stanzaId,
                   fromMe: [sock.user.lid, sock.user.pn].includes(jidNormalizedUser(info.participant))
@@ -102,7 +102,7 @@ async function fetchMessage(sock, ctx, quote) {
    return toObject(m)
    
    function getPNforLID(lid) {
-      if(!lid.endsWith('lid')) return 
+      if (!lid.endsWith('lid')) return
       const cache = sock.signalRepository.lidMapping.mappingCache.get
       const func = sock.signalRepository.lidMapping.getPNForLID
       

@@ -1,5 +1,5 @@
 import { OPC_CONFIG } from './sock.js';
-import { colors } from '../../Defaults/index.js';
+import { colors } from '.././Defaults/index.js';
 import {
    jidNormalizedUser,
    S_WHATSAPP_NET
