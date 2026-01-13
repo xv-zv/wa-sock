@@ -6,7 +6,7 @@ export class Events {
    #get = event => this.#events.get(event)
    
    on = (event, listner) => {
-      if (!this.#has(event)) this.#events[event] = []
+      if (!this.#has(event)) this.#events.set(event, [])
       const listners = this.#get(event)
       listners.push(listner)
       return this
