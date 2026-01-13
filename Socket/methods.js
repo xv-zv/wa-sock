@@ -25,8 +25,8 @@ export const methods = (sock) => ({
    },
    async getPNForLID(id) {
       if (!id.endsWith('lid')) return
-      const func = sock.signalRepository.lidMapping.getPNForLID
-      const result = typeof func == 'function' ? await func(id) : sock.signalRepository.lidMapping.mappingCache.get(`lid:${id.replace(/\D/g,'')}`) + S_WHATSAPP_NET
+      const mapping = sock.signalRepository.lidMapping
+      const result = typeof mapping.getPNForLID == 'function' ? await mapping.getPNForLID(id) : mapping.mappingCache.get(`lid:${id.replace(/\D/g,'')}`) + S_WHATSAPP_NET
       return jidNormalizedUser(result)
    },
    async getLIDForPN(id) {

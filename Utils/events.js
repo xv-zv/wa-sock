@@ -26,7 +26,7 @@ export class Events {
    }
    
    emit = (event, ...args) => {
-      if (!this.#has[event]) return this
+      if (!this.#has(event)) return this
       const listners = this.#get(event)
       for (const listner of listners) {
          listner(...args)
