@@ -93,19 +93,12 @@ async function fetchMessage(sock, ctx, quote) {
       
       if (m.isGroup) {
          
-         const gp = await sock.groupData(m.from)
+         const gp = await sock.groupData(m.from, m.id)
          
          m = {
             ...m,
             get group() {
-               return {
-                  name: group.name,
-                  open: group.open
-                  owner: group.owner,
-                  isComm: group.isComm,
-                  isAdmin: group.users.some(i => i.id == m.id && i.admin),
-                  isBotAdmin
-               }
+               return gp
             }
          }
       }
