@@ -10,7 +10,8 @@ import pino from 'pino';
 import ws from 'ws';
 import fs from 'fs/promises';
 import { DEFAULT_OPC } from '../Defaults/index.js';
-import { Events, methods, normalizeConfig } from '../Utils/index.js';
+import { Events, normalizeConfig } from '../Utils/index.js';
+import { methods } from './methods.js'
 import fetchMessage from './message.js';
 
 export let OPC_CONFIG = {}
