@@ -104,7 +104,7 @@ async function fetchMessage(sock, ctx, quote) {
       }
       
       m.reply = function(text, opc = {}) {
-         return sock.sendMessage(opc.from || from, {
+         return sock.sendMessage(opc.from || m.from, {
             text
          }, { ...opc, ephemeral: opc.ephemeral || m.ephemeral, quote: opc.quote || ctx })
       }
