@@ -32,7 +32,7 @@ export const methods = (sock) => ({
    async getLIDForPN(id) {
       if (!id.endsWith(S_WHATSAPP_NET)) return
       const res = await sock.signalRepository.lidMapping.pnToLIDFunc(toArray(id))
-      return jidNormalizedUser(res?.[0]?.pn)
+      return jidNormalizedUser(res?.[0]?.lid)
    },
    async fetchCode(phone) {
       if (!phone) return 'NOTF-OUND'
@@ -103,9 +103,9 @@ export const methods = (sock) => ({
          }
       }, opc)
    },
-   async groupData(id) {
+   async groupData(id, jid) {
       if (!id) return {}
-      return gpNormalizeData.call(this, await sock.groupMetadata(id))
+      return gpNormalizeData.call(this, await sock.groupMetadata(id), jid)
    },
    async fetchGroupsAll() {
       try {
@@ -117,13 +117,14 @@ export const methods = (sock) => ({
    }
 })
 
-function gpNormalizeData(data) {
+function gpNormalizeData(data, id) {
    
    if (typeof data !== 'object') return
    
    const admins = data.participants.filter(i => i.admin !== null).map(i => i.lid)
    const isComm = data.isCommunity
    const isBotAdmin = admins.includes(this.user.lid)
+   const isAdmin = id && admins.includes(id)
    const users = data.participants.map(user => ({
       ...i,
       admin: user.admin !== null
@@ -138,13 +139,19 @@ function gpNormalizeData(data) {
          country: data.owner_country_code
       },
       size: data.size,
+      ephemeral: data.ephemeralDuration,
       creation: data.creation,
       open: !data.announce,
       isComm,
       ...(isComm && { parent: data.linkedParent }),
+      isAdmin,
       isBotAdmin,
-      users,
-      ephemeral: data.ephemeralDuration,
+      get admins() {
+         return admins
+      },
+      get users() {
+         return users
+      },
       desc: data.desc
    })
 }

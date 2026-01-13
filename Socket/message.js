@@ -18,13 +18,17 @@ async function fetchMessage(sock, ctx, quote) {
    
    const ids = Object.values(m.isMe ? sock.user : ctx.key).filter(i => /\d+@\D/.test(i))
    const user_lid = ids.find(i => i.endsWith('lid'))
-   const user_pn = jidNormalizedUser(ids.find(i => i.endsWith('net'))) || await sock.getPNforLID(user_lid)
+   const user_pn = jidNormalizedUser(ids.find(i => i.endsWith('net'))) || await sock.getPNForLID(user_lid)
    
    m.id = user_lid || user_pn
    m.name = ctx.pushName
    m.user_lid = user_lid
    m.user_pn = user_pn
    m.isOwner = OPC_CONFIG.owner.includes(m.id) || m.isMe
+   
+   const group = !quote && m.isGroup ? await sock.groupData(m.from) : null
+   
+   m.isAdmin = group && group.users.some(i => i.id == m.id && i.admin)
    
    const type = getContentType(ctx.message)
    const msg = ctx.message[type] || {}
@@ -87,6 +91,25 @@ async function fetchMessage(sock, ctx, quote) {
    
    if (!quote) {
       
+      if (m.isGroup) {
+         
+         const gp = await sock.groupData(m.from)
+         
+         m = {
+            ...m,
+            get group() {
+               return {
+                  name: group.name,
+                  open: group.open
+                  owner: group.owner,
+                  isComm: group.isComm,
+                  isAdmin: group.users.some(i => i.id == m.id && i.admin),
+                  isBotAdmin
+               }
+            }
+         }
+      }
+      
       m.reply = function(text, opc = {}) {
          return sock.sendMessage(opc.from || from, {
             text
@@ -100,13 +123,5 @@ async function fetchMessage(sock, ctx, quote) {
    }
    
    return toObject(m)
-   
-   function getPNforLID(lid) {
-      if (!lid.endsWith('lid')) return
-      const cache = sock.signalRepository.lidMapping.mappingCache.get
-      const func = sock.signalRepository.lidMapping.getPNForLID
-      
-   }
-   
 }
 export default fetchMessage
