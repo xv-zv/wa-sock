@@ -24,13 +24,13 @@ export const methods = (sock) => ({
       }
    },
    async getPNForLID(id) {
-      if (!id.endsWith('lid')) return
+      if (!id?.endsWith('lid')) return
       const mapping = sock.signalRepository.lidMapping
       const result = typeof mapping.getPNForLID == 'function' ? await mapping.getPNForLID(id) : mapping.mappingCache.get(`lid:${id.replace(/\D/g,'')}`) + S_WHATSAPP_NET
       return jidNormalizedUser(result)
    },
    async getLIDForPN(id) {
-      if (!id.endsWith(S_WHATSAPP_NET)) return
+      if (!id?.endsWith(S_WHATSAPP_NET)) return
       const res = await sock.signalRepository.lidMapping.pnToLIDFunc(toArray(id))
       return jidNormalizedUser(res?.[0]?.lid)
    },
@@ -119,23 +119,33 @@ export const methods = (sock) => ({
 
 function gpNormalizeData(data, id) {
    
-   if (typeof data !== 'object') return
+   if (typeof data !== 'object' || Array.isArray(data)) return {}
    
-   const admins = data.participants.filter(i => i.admin !== null).map(i => i.lid)
    const isComm = data.isCommunity
-   const isBotAdmin = admins.includes(this.user.lid)
-   const isAdmin = id && admins.includes(id)
-   const users = data.participants.map(user => ({
-      ...i,
-      admin: user.admin !== null
+   const lidMode = data.addressingMode == 'lid'
+   const users = data.participants.map(i => ({
+      id: i.id,
+      pn: i.phoneNumber,
+      lid: lidMode ? i.id : i.lid,
+      admin: i.admin !== null
    }))
+   
+   const owner_key = ['owner', 'subjectOwner', 'descOwner']
+   const owner_lid = data[owner_key]
+   const owner_pn = data[owner_key + 'Pn']
+   
+   const admins = users.filter(i => i.admin).map(i => i.id)
+   
+   const isBotAdmin = admins.includes(lidMode ? this.user.lid : this.user.pn)
+   const isAdmin = id && admins.includes(id)
    
    return toObject({
       id: data.id,
       name: data.subject || 'annonymous',
       owner: {
-         id: data.ownerJid,
-         lid: data.owner,
+         id: owner_lid || owner_pn,
+         pn: owner_pn,
+         lid: owner_lid,
          country: data.owner_country_code
       },
       size: data.size,
@@ -146,12 +156,7 @@ function gpNormalizeData(data, id) {
       ...(isComm && { parent: data.linkedParent }),
       isAdmin,
       isBotAdmin,
-      get admins() {
-         return admins
-      },
-      get users() {
-         return users
-      },
+      users,
       desc: data.desc
    })
 }
