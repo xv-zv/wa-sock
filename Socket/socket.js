@@ -1,7 +1,8 @@
 import {
    normalizedConfig,
    EventsEmiter,
-   store
+   storeCache,
+   groupCache
 } from '../Utils/index.js';
 import makeWASocket, {
    useMultiFileAuthState,
@@ -61,20 +62,23 @@ export class Socket extends EventsEmiter {
          for (const msg of messages) {
             
             if (!isRealMessage(msg)) continue
-            
-            const input = {
+            const id = msg.key.remoteJid
+            if (this.#opc.groupCache) {
+               await this.groupMetadata(id)
+            }
+            const options = {
                prefix: this.#opc.prefix,
                owners: this.#opc.owners,
                user_id: this.user.id
             }
-            const m = new Message(msg, input)
+            const m = new Message(msg, options)
             
             const data = {
-               id: m.from,
+               id,
                expiration: m.expiration,
                message: msg
             }
-            store.run(data, () => {
+            storeCache.run(data, () => {
                if (m.isCommand) this.emitCmd(this.hasCmd(m.command) ? m.command : 'default', m)
                if (m.isMedia) this.emit('media', m)
                if (!m.isCommand && !m.isMedia) this.emit('text', m)
@@ -126,6 +130,7 @@ export class Socket extends EventsEmiter {
       event: 'creds.update',
       func: saveCreds
    }]
+   
    get user() {
       const user = sock.user || {}
       return {
@@ -135,7 +140,7 @@ export class Socket extends EventsEmiter {
       }
    }
    sendMessage(jid, content, opc = {}) {
-      const data = store.getStore() || {}
+      const data = storeCache.getStore() || {}
       const id = jid || opc.id || data.id
       const quoted = typeof opc.quote == 'boolean' && opc.quote ? data.message : opc.quoted || null
       if (!id) return
@@ -153,7 +158,7 @@ export class Socket extends EventsEmiter {
       return this.sendMessage(null, { text }, opc)
    }
    react(text, opc = {}) {
-      const data = store.getStore() || {}
+      const data = storeCache.getStore() || {}
       if (!data.message?.key && !opc.key) return
       return this.#sock.sendMessage(data.id, {
          react: {
@@ -161,5 +166,27 @@ export class Socket extends EventsEmiter {
             key: opc.key || data.message.key
          }
       })
+   }
+   async groupMetadata(id) {
+      if (!id || !id.endsWith('us')) return
+      let data = null
+      if (groupCache.has(id)) {
+         data = groupCache.get(id)
+      } else {
+         const group = await this.#sock.groupMetadata(id)
+         const users = group.participants.map(i => ({ id: i.id, admin: i.admin !== null }))
+         data = {
+            id,
+            name: group.subject,
+            size: group.size,
+            ephemeral: group.ephemeralExpiratiom,
+            creation: group.creation,
+            open: !group.announce,
+            users,
+            desc: group.desc
+         }
+         groupCache.set(id, data)
+      }
+      return data
    }
 }

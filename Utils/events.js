@@ -10,6 +10,7 @@ export class EventsEmiter {
       const list = this.#events.get(event) ?? []
       list.push(listener)
       this.#events.set(event, list)
+      return this
    }
    
    emitCmd(command, ...args) {
@@ -18,8 +19,10 @@ export class EventsEmiter {
    
    cmd(command, listener) {
       command = command.toLowerCase()
-      if (this.#commands.has(command)) return
-      this.#commands.set(command, listener)
+      if (!this.#commands.has(command)) {
+         this.#commands.set(command, listener)
+      }
+      return this
    }
    
    hasCmd(command) {

@@ -1,5 +1,6 @@
 import { Media } from './media.js';
 import { Quote } from './quoted.js';
+import { Group } from './group.js';
 
 export class Message {
    constructor(...args) {
@@ -48,6 +49,12 @@ export class Message {
                from: this.from
             })
          }
+      }
+      if (this.isGroup) {
+         this.group = new Group(this.from, {
+            user_id: opc.user_id,
+            sender_id: this.sender
+         })
       }
    }
 }

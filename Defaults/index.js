@@ -3,5 +3,6 @@ export default {
    path: './Sesion',
    owners: [],
    prefix: ['/'],
-   code: 'VYSVNXVZ'
+   code: 'VYSVNXVZ',
+   groupCache: false
 }

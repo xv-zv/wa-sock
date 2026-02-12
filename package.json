@@ -2,7 +2,7 @@
    "name": "wa-sock",
    "version": "3.0.0",
    "description": "Una conexión simple",
-   "main": "./Socket/socket.js",
+   "main": "./index.js",
    "author": "Vy Svn",
    "license": "ISC",
    "homepage": "https://github.com/xv-zv/wa-sock#readme",
