@@ -8,7 +8,7 @@ export class Group {
    parse(opc) {
       if (!groupCache.has(this.#id)) return
       const group = groupCache.get(this.#id)
-      for (const key of group) {
+      for (const key in group) {
          if (['users', 'desc'].includes(key)) continue
          this[key] = group[key]
       }

@@ -2,7 +2,7 @@ import {
    normalizedConfig,
    EventsEmiter,
    storeCache,
-   groupCache
+   groupCache,
 } from '../Utils/index.js';
 import makeWASocket, {
    useMultiFileAuthState,
@@ -12,7 +12,7 @@ import makeWASocket, {
 } from 'baileys';
 import { rm } from 'node:fs/promises';
 import pino from 'pino';
-import { Message } from './message.js'
+import { Message } from './message.js';
 
 export class Socket extends EventsEmiter {
    #opc = null
@@ -31,8 +31,7 @@ export class Socket extends EventsEmiter {
       if (this.isOnline) return
       
       const {
-         state: auth,
-         saveCreds
+         state: auth
       } = await useMultiFileAuthState(this.#opc.path)
       
       this.#sock = await makeWASocket({
