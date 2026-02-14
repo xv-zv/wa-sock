@@ -31,7 +31,8 @@ export class Socket extends EventsEmiter {
       if (this.isOnline) return
       
       const {
-         state: auth
+         state: auth,
+         saveCreds
       } = await useMultiFileAuthState(this.#opc.path)
       
       this.#sock = await makeWASocket({
