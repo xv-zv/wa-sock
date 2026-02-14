@@ -1,4 +1,4 @@
-import { groupCache } from '../Utils/index.js';
+import { groupCache } from '#cache';
 
 export class Group {
    #id = null
