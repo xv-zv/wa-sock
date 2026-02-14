@@ -1,6 +1,7 @@
 import { groupCache } from '../Utils/index.js';
 
 export class Group {
+   #id = null
    constructor(id, options = {}) {
       this.#id = id
       this.parse(options)
