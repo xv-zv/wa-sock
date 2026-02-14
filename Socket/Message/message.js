@@ -1,5 +1,5 @@
 import { Media } from './media.js';
-import { Quote } from './quoted.js';
+import { Quote } from './quote.js';
 import { Group } from './group.js';
 
 export class Message {
