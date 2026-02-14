@@ -65,7 +65,7 @@ export class Socket extends EventsEmiter {
             
             if (!isRealMessage(msg)) continue
             const id = msg.key.remoteJid
-            const isGroup = isJidGroup()
+            const isGroup = isJidGroup(id)
             if (isGroup) await this.groupMetadata(id)
             
             const options = {
@@ -171,25 +171,27 @@ export class Socket extends EventsEmiter {
    }
    async groupMetadata(id) {
       if (!id || !isJidGroup(id)) return
-      let data = null
-      if (groupCache.has(id)) {
-         data = groupCache.get(id)
-      } else {
-         const group = await this.#sock.groupMetadata(id)
-         const users = group.participants.map(i => ({ id: i.id, admin: i.admin !== null }))
-         data = {
-            id,
-            name: group.subject,
-            owner: group.owner,
-            size: group.size,
-            ephemeral: group.ephemeralExpiratiom,
-            creation: group.creation,
-            open: !group.announce,
-            users,
-            desc: group.desc
-         }
-         groupCache.set(id, data)
+      
+      if (groupCache.has(id)) return groupCache.get(id)
+      
+      const group = await this.#sock.groupMetadata(id)
+      
+      const data = {
+         id,
+         name: group.subject,
+         owner: group.owner,
+         size: group.size,
+         ephemeral: group.ephemeralExpiration,
+         creation: group.creation,
+         open: !group.announce,
+         users: group.participants.map(i => ({
+            id: i.id,
+            admin: !!i.admin
+         })),
+         desc: group.desc
       }
+      
+      groupCache.set(id, data)
       return data
    }
 }
