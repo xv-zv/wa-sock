@@ -1,5 +1,4 @@
 import { Media } from './media.js';
-import { Quote } from './quote.js';
 import { Group } from './group.js';
 
 export class Message {
@@ -13,16 +12,16 @@ export class Message {
       this.isMe = ctx.key.fromMe
       this.sender = this.isMe ? opc.user_id : ctx.key.participant || this.from
       this.name = ctx.pushName || 'annonymous'
-      this.isOwner = opc.owners.includes(this.sender) || this.isMe
+      this.isOwner = opc.owners?.includes(this.sender) || this.isMe
       
       const type = getContentType(ctx.message)
       const message = ctx.message[type] || {}
       this.text = (typeof message == 'string' ? message : message.caption || message.text || '').trim()
       
       if (this.text) {
-         const isCommand = opc.prefix.some(i => this.text.startsWith(i))
+         const isCommand = opc.prefix?.some(i => this.text.startsWith(i))
          if (isCommand && !opc.quote) {
-            const [command, ...args] = text.slice(1).trim().split(/ +/)
+            const [command, ...args] = this.text.slice(1).trim().split(/ +/)
             if (command) {
                this.isCommand = isCommand
                this.command = command.toLowerCase()
@@ -42,15 +41,20 @@ export class Message {
          if (info.mentionedJid?.length) this.mentions = info.mentionedJid
          if (info.expiration) this.expiration = info.expiration
          
-         if (info.quotedMessage) {
+         if (info.quotedMessage && !opc.quote) {
             this.isQuote = true
-            this.quote = new Quote(info, {
-               ...opc,
-               from: this.from
-            })
+            this.quote = new Message({
+               key: {
+                  remoteJid: info.remoteJid || this.from,
+                  participant: info.participant,
+                  id: info.stanzaId,
+                  fromMe: info.participant == opc.user_id
+               },
+               message: info.quotedMessage
+            }, { ...opc, quote: true })
          }
       }
-      if (this.isGroup) {
+      if (this.isGroup && !opc.quote) {
          this.group = new Group(this.from, {
             user_id: opc.user_id,
             sender_id: this.sender
