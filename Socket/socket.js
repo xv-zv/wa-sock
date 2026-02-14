@@ -59,7 +59,7 @@ export class Socket extends EventsEmiter {
    {
       event: 'messages.upsert',
       func: async ({ type, messages }) => {
-         if (type == 'notify') return
+         if (type !== 'notify') return
          
          for (const msg of messages) {
             
