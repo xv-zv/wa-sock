@@ -34,7 +34,7 @@ function changeUsers(jid, options) {
          }
          if (['demote', 'promote'].includes(action)) {
             const user = group[tag].find(i => i.id == id)
-            if (user) user.admin = action == 'promote' ? true : false
+            if (user) user.admin = action == 'promote'
             continue
          }
       }

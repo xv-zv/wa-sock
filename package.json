@@ -6,6 +6,9 @@
    "author": "Vy Svn",
    "license": "ISC",
    "homepage": "https://github.com/xv-zv/wa-sock#readme",
+   "imports": {
+      "#cache.js": "./Utils/cache.js"
+   },
    "dependencies": {
       "baileys": "7.0.0-rc.9"
    }

@@ -3,16 +3,16 @@ import {
    EventsEmiter,
    storeCache,
    groupCache,
+   changeGroupCache
 } from '../Utils/index.js';
 import makeWASocket, {
    useMultiFileAuthState,
    isRealMessage,
-   DisconnectReason,
-   jidNormalizedUser
+   DisconnectReason
 } from 'baileys';
 import { rm } from 'node:fs/promises';
 import pino from 'pino';
-import { Message } from './message.js';
+import { Message } from './Message/message.js';
 
 export class Socket extends EventsEmiter {
    #opc = null
@@ -62,9 +62,9 @@ export class Socket extends EventsEmiter {
             
             if (!isRealMessage(msg)) continue
             const id = msg.key.remoteJid
-            if (this.#opc.groupCache) {
-               await this.groupMetadata(id)
-            }
+            const isGroup = id.endsWith('@g.us')
+            if (isGroup) await this.groupMetadata(id)
+            
             const options = {
                prefix: this.#opc.prefix,
                owners: this.#opc.owners,
@@ -131,7 +131,7 @@ export class Socket extends EventsEmiter {
    }]
    
    get user() {
-      const user = sock.user || {}
+      const user = this.#sock.user || {}
       return {
          id: jidNormalizedUser(user.lid || user.id),
          pn: jidNormalizedUser(user.id || ''),
@@ -177,6 +177,7 @@ export class Socket extends EventsEmiter {
          data = {
             id,
             name: group.subject,
+            owner: group.owner,
             size: group.size,
             ephemeral: group.ephemeralExpiratiom,
             creation: group.creation,
