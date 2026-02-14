@@ -1,6 +1,9 @@
 import { Media } from './media.js';
 import { Group } from './group.js';
-import { isJidGroup } from 'baileys';
+import {
+   isJidGroup,
+   getContentType
+} from 'baileys';
 
 export class Message {
    constructor(...args) {
