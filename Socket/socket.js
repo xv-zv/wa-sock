@@ -8,6 +8,7 @@ import {
 import makeWASocket, {
    useMultiFileAuthState,
    isRealMessage,
+   jidNormalizedUser,
    DisconnectReason
 } from 'baileys';
 import { rm } from 'node:fs/promises';
