@@ -9,6 +9,7 @@ import makeWASocket, {
    useMultiFileAuthState,
    isRealMessage,
    jidNormalizedUser,
+   isJidGroup,
    DisconnectReason
 } from 'baileys';
 import { rm } from 'node:fs/promises';
@@ -64,7 +65,7 @@ export class Socket extends EventsEmiter {
             
             if (!isRealMessage(msg)) continue
             const id = msg.key.remoteJid
-            const isGroup = id.endsWith('@g.us')
+            const isGroup = isJidGroup()
             if (isGroup) await this.groupMetadata(id)
             
             const options = {
@@ -169,7 +170,7 @@ export class Socket extends EventsEmiter {
       })
    }
    async groupMetadata(id) {
-      if (!id || !id.endsWith('us')) return
+      if (!id || !isJidGroup(id)) return
       let data = null
       if (groupCache.has(id)) {
          data = groupCache.get(id)
