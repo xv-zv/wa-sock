@@ -12,10 +12,12 @@ export class Message {
    parse(ctx, opc = {}) {
       
       this.from = ctx.key.remoteJid
-      this.isGroup = isJidGroup(this.from)
       this.isMe = ctx.key.fromMe
       this.sender = this.isMe ? opc.user_id : ctx.key.participant || this.from
-      this.name = ctx.pushName || 'annonymous'
+      if (!opc.quote) {
+         this.isGroup = isJidGroup(this.from)
+         this.name = ctx.pushName
+      }
       this.isOwner = opc.owners?.includes(this.sender) || this.isMe
       
       const type = getContentType(ctx.message)

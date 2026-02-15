@@ -181,7 +181,7 @@ export class Socket extends EventsEmiter {
          name: group.subject,
          owner: group.owner,
          size: group.size,
-         ephemeral: group.ephemeralExpiration,
+         ephemeral: group.ephemeralDuration,
          creation: group.creation,
          open: !group.announce,
          users: group.participants.map(i => ({
