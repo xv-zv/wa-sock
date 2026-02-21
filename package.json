@@ -5,11 +5,12 @@
    "main": "./index.js",
    "author": "Vy Svn",
    "license": "ISC",
+   "type": "module",
    "homepage": "https://github.com/xv-zv/wa-sock#readme",
    "imports": {
       "#cache": "./Utils/cache.js"
    },
-   "dependencies": {
-      "baileys": "7.0.0-rc.9"
+   "devDependencies": {
+      "baileys": "^7.0.0-rc.9"
    }
 }
