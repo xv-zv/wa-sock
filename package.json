@@ -1,6 +1,6 @@
 {
    "name": "wa-sock",
-   "version": "3.0.0",
+   "version": "3.0.1",
    "description": "Una conexión simple",
    "main": "./index.js",
    "author": "Vy Svn",
