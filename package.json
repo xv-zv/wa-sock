@@ -10,7 +10,7 @@
    "imports": {
       "#cache": "./Utils/cache.js"
    },
-   "devDependencies": {
+   "dependencies": {
       "baileys": "^7.0.0-rc.9"
    }
 }
